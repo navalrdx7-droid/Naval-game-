@@ -3,17 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>NAVAL VIDEO EDITOR V6</title>
+
+<title>NAVAL AI VIDEO EDITOR V7</title>
 
 <style>
 *{
   box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
 
 body{
   margin:0;
   background:#080808;
-  color:white;
+  color:#fff;
   font-family:Arial,sans-serif;
 }
 
@@ -26,12 +28,12 @@ header{
 
 header h1{
   margin:0;
-  font-size:24px;
+  font-size:25px;
 }
 
 header p{
-  color:#aaa;
   margin:7px 0 0;
+  color:#999;
 }
 
 .container{
@@ -42,37 +44,33 @@ header p{
 
 .card{
   background:#181818;
+  border-radius:17px;
   padding:18px;
-  border-radius:16px;
   margin-bottom:15px;
 }
 
 label{
   display:block;
   color:#bbb;
-  margin-bottom:8px;
+  margin:12px 0 7px;
 }
 
-input[type=file]{
+input[type=file],
+input[type=text],
+input[type=number],
+select{
   width:100%;
   padding:14px;
+  border:0;
+  border-radius:10px;
   background:#292929;
   color:white;
-  border-radius:10px;
+  font-size:16px;
 }
 
-video{
+input[type=range]{
   width:100%;
-  margin-top:15px;
-  background:#000;
-  border-radius:12px;
-  display:block;
-}
-
-audio{
-  width:100%;
-  margin-top:15px;
-  display:block;
+  accent-color:#00d9ff;
 }
 
 button{
@@ -87,17 +85,101 @@ button{
   font-weight:bold;
 }
 
+button:active{
+  transform:scale(.98);
+}
+
+button:disabled{
+  opacity:.5;
+}
+
+.green{
+  background:#20d66b;
+}
+
+.purple{
+  background:#8b4dff;
+  color:white;
+}
+
+.red{
+  background:#e53935;
+  color:white;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+}
+
+.row button{
+  flex:1;
+}
+
+video{
+  width:100%;
+  max-height:500px;
+  margin-top:15px;
+  background:#000;
+  border-radius:12px;
+  display:block;
+}
+
+audio{
+  width:100%;
+  margin-top:12px;
+}
+
+canvas{
+  display:none;
+}
+
+.value{
+  float:right;
+  color:#00d9ff;
+  font-weight:bold;
+}
+
 .status{
   text-align:center;
   color:#00d9ff;
-  padding:10px;
   min-height:25px;
+  line-height:1.5;
 }
 
-.info{
-  color:#999;
-  font-size:14px;
+.badge{
+  display:inline-block;
   margin-top:10px;
+  padding:7px 10px;
+  background:#292929;
+  color:#aaa;
+  border-radius:20px;
+  font-size:13px;
+}
+
+.previewBox{
+  margin-top:12px;
+  padding:12px;
+  background:#101010;
+  border-radius:12px;
+  color:#aaa;
+  text-align:center;
+}
+
+.progressBox{
+  width:100%;
+  height:10px;
+  margin-top:12px;
+  background:#292929;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+.progressBar{
+  width:0%;
+  height:100%;
+  background:#08cbea;
+  transition:.2s;
 }
 </style>
 </head>
@@ -105,8 +187,8 @@ button{
 <body>
 
 <header>
-<h1>🎬 NAVAL VIDEO EDITOR V6</h1>
-<p>Video + Audio Test</p>
+  <h1>🎬 NAVAL AI VIDEO EDITOR V7</h1>
+  <p>Smart Mobile Video Editing Studio</p>
 </header>
 
 <div class="container">
@@ -115,7 +197,7 @@ button{
 
 <div class="card">
 
-<label>🎥 Video Select करो</label>
+<label>🎥 Select Video</label>
 
 <input
   type="file"
@@ -129,8 +211,10 @@ button{
   preload="metadata">
 </video>
 
-<div class="info" id="videoInfo">
-Video select नहीं किया गया
+<div
+  class="badge"
+  id="videoInfo">
+  Video select नहीं किया गया
 </div>
 
 </div>
@@ -140,7 +224,7 @@ Video select नहीं किया गया
 
 <div class="card">
 
-<label>🎵 Audio Select करो</label>
+<label>🎵 Background Music</label>
 
 <input
   type="file"
@@ -152,44 +236,245 @@ Video select नहीं किया गया
   controls>
 </audio>
 
-<div class="info" id="audioInfo">
-Audio select नहीं किया गया
+<div
+  class="badge"
+  id="audioInfo">
+  Audio select नहीं किया गया
 </div>
 
 </div>
 
 
-<!-- TEST -->
+<!-- FORMAT -->
 
 <div class="card">
 
-<button onclick="playVideo()">
-▶️ PLAY VIDEO
+<label>📱 Output Format</label>
+
+<select id="format">
+
+<option value="vertical">
+📱 Shorts / Reels — 9:16
+</option>
+
+<option value="landscape">
+🖥️ YouTube — 16:9
+</option>
+
+<option value="square">
+⬛ Square — 1:1
+</option>
+
+</select>
+
+<div class="previewBox" id="formatInfo">
+Current: 9:16 Vertical
+</div>
+
+</div>
+
+
+<!-- VOLUME -->
+
+<div class="card">
+
+<label>
+🔊 Original Video
+<span
+  class="value"
+  id="videoVolumeValue">
+  100%
+</span>
+</label>
+
+<input
+  type="range"
+  id="videoVolume"
+  min="0"
+  max="100"
+  value="100">
+
+<label>
+🎵 Background Music
+<span
+  class="value"
+  id="audioVolumeValue">
+  30%
+</span>
+</label>
+
+<input
+  type="range"
+  id="audioVolume"
+  min="0"
+  max="100"
+  value="30">
+
+</div>
+
+
+<!-- TRIM -->
+
+<div class="card">
+
+<label>✂️ Start Time — seconds</label>
+
+<input
+  type="number"
+  id="start"
+  value="0"
+  min="0"
+  step="0.1">
+
+<label>⏱️ End Time — seconds</label>
+
+<input
+  type="number"
+  id="end"
+  value="0"
+  min="0"
+  step="0.1">
+
+<div class="row">
+
+<button onclick="setStart()">
+✂️ SET START
 </button>
 
-<button onclick="playAudio()">
-🎵 PLAY AUDIO
+<button onclick="setEnd()">
+✂️ SET END
 </button>
 
-<button onclick="stopAll()">
-⏹️ STOP
+</div>
+
+<button onclick="resetTrim()">
+↩️ RESET TRIM
 </button>
 
 </div>
 
 
+<!-- TEXT -->
+
 <div class="card">
 
-<div class="status" id="status">
+<label>📝 Caption / Text</label>
+
+<input
+  type="text"
+  id="videoText"
+  placeholder="NAVAL GAMING 🔥">
+
+</div>
+
+
+<!-- FILTER -->
+
+<div class="card">
+
+<label>🎨 Editing Filter</label>
+
+<select id="filter">
+
+<option value="none">
+Normal
+</option>
+
+<option value="contrast(1.35) saturate(1.4)">
+🔥 Gaming Cinematic
+</option>
+
+<option value="contrast(1.5) saturate(1.7)">
+⚡ Vivid
+</option>
+
+<option value="brightness(1.2) saturate(1.5)">
+☀️ Bright
+</option>
+
+<option value="grayscale(1)">
+⚫ Black & White
+</option>
+
+<option value="sepia(.7)">
+🎞️ Vintage
+</option>
+
+<option value="contrast(1.25) brightness(1.08) saturate(1.25)">
+🎬 Movie
+</option>
+
+</select>
+
+</div>
+
+
+<!-- SMART -->
+
+<div class="card">
+
+<button
+  class="purple"
+  onclick="smartEdit()">
+🧠 SMART AUTO SETTINGS
+</button>
+
+</div>
+
+
+<!-- ACTIONS -->
+
+<div class="card">
+
+<button onclick="previewEdit()">
+▶️ PLAY EDITED PREVIEW
+</button>
+
+<button
+  class="green"
+  onclick="showEditInfo()">
+✅ CHECK EDIT SETTINGS
+</button>
+
+<button onclick="resetEditor()">
+🔄 RESET ALL
+</button>
+
+</div>
+
+
+<!-- STATUS -->
+
+<div class="card">
+
+<div
+  class="status"
+  id="status">
 पहले Video select करो
 </div>
 
+<div class="progressBox">
+
+<div
+  class="progressBar"
+  id="progressBar">
 </div>
 
 </div>
+
+</div>
+
+</div>
+
+
+<canvas id="canvas"></canvas>
 
 
 <script>
+
+/* =========================
+   ELEMENTS
+========================= */
 
 const video =
 document.getElementById("video");
@@ -197,14 +482,23 @@ document.getElementById("video");
 const audio =
 document.getElementById("audio");
 
+const canvas =
+document.getElementById("canvas");
+
+const ctx =
+canvas.getContext("2d");
+
 const videoFile =
 document.getElementById("videoFile");
 
 const audioFile =
 document.getElementById("audioFile");
 
-const status =
+const statusText =
 document.getElementById("status");
+
+const progressBar =
+document.getElementById("progressBar");
 
 const videoInfo =
 document.getElementById("videoInfo");
@@ -212,210 +506,922 @@ document.getElementById("videoInfo");
 const audioInfo =
 document.getElementById("audioInfo");
 
+const format =
+document.getElementById("format");
+
+const formatInfo =
+document.getElementById("formatInfo");
+
+
+/* =========================
+   VARIABLES
+========================= */
+
 let videoURL = null;
 let audioURL = null;
 
+let videoLoaded = false;
+let audioLoaded = false;
 
-/* =====================
-   VIDEO
-===================== */
+
+/* =========================
+   STATUS
+========================= */
+
+function setStatus(text){
+
+  statusText.innerText = text;
+
+}
+
+
+/* =========================
+   PROGRESS
+========================= */
+
+function setProgress(value){
+
+  value =
+    Math.max(
+      0,
+      Math.min(100,value)
+    );
+
+  progressBar.style.width =
+    value + "%";
+
+}
+
+
+/* =========================
+   VIDEO LOAD
+========================= */
 
 videoFile.addEventListener(
 "change",
 function(){
 
-  const file = this.files[0];
+  const file =
+    this.files[0];
 
-  if(!file){
+  if(!file)
     return;
-  }
+
 
   if(videoURL){
-    URL.revokeObjectURL(videoURL);
+
+    URL.revokeObjectURL(
+      videoURL
+    );
+
   }
+
 
   videoURL =
     URL.createObjectURL(file);
 
+
   video.pause();
 
-  video.src = videoURL;
+  video.src =
+    videoURL;
 
   video.load();
 
+
+  videoLoaded = true;
+
+
   videoInfo.innerText =
-    "✅ " +
+    "🎥 " +
     file.name;
 
-  status.innerText =
-    "🎥 Video ready — Play दबाओ";
+
+  setStatus(
+    "🎥 Video loading..."
+  );
+
+
+  video.onloadedmetadata =
+    function(){
+
+      document.getElementById(
+        "start"
+      ).value = "0";
+
+
+      document.getElementById(
+        "end"
+      ).value =
+        video.duration.toFixed(1);
+
+
+      videoInfo.innerText =
+        "✅ " +
+        Math.round(
+          video.duration
+        ) +
+        " sec video";
+
+
+      setStatus(
+        "✅ Video ready"
+      );
+
+
+      setProgress(0);
+
+    };
 
 });
 
 
-video.addEventListener(
-"loadedmetadata",
-function(){
-
-  videoInfo.innerText =
-    "✅ Video ready — " +
-    Math.round(video.duration) +
-    " seconds";
-
-});
-
+/* =========================
+   VIDEO ERROR
+========================= */
 
 video.addEventListener(
 "error",
 function(){
 
-  status.innerText =
-    "❌ यह video format browser में support नहीं है";
+  setStatus(
+    "❌ Video load नहीं हो पाया"
+  );
 
 });
 
 
-/* =====================
-   AUDIO
-===================== */
+/* =========================
+   AUDIO LOAD
+========================= */
 
 audioFile.addEventListener(
 "change",
 function(){
 
-  const file = this.files[0];
+  const file =
+    this.files[0];
 
-  if(!file){
+  if(!file)
     return;
-  }
+
 
   if(audioURL){
-    URL.revokeObjectURL(audioURL);
+
+    URL.revokeObjectURL(
+      audioURL
+    );
+
   }
+
 
   audioURL =
     URL.createObjectURL(file);
 
+
   audio.pause();
 
-  audio.src = audioURL;
+  audio.src =
+    audioURL;
 
   audio.load();
 
+
+  audioLoaded = true;
+
+
   audioInfo.innerText =
-    "✅ " +
+    "🎵 " +
     file.name;
 
-  status.innerText =
-    "🎵 Audio ready — Play दबाओ";
+
+  setStatus(
+    "🎵 Audio ready"
+  );
 
 });
 
 
-audio.addEventListener(
-"loadedmetadata",
-function(){
-
-  audioInfo.innerText =
-    "✅ Audio ready";
-
-});
-
+/* =========================
+   AUDIO ERROR
+========================= */
 
 audio.addEventListener(
 "error",
 function(){
 
-  status.innerText =
-    "❌ यह audio format browser में support नहीं है";
+  setStatus(
+    "❌ Audio load नहीं हो पाया"
+  );
 
 });
 
 
-/* =====================
-   PLAY VIDEO
-===================== */
+/* =========================
+   VOLUME
+========================= */
 
-async function playVideo(){
+function updateVolumes(){
 
-  if(!video.src){
+  const videoVolume =
+    Number(
+      document.getElementById(
+        "videoVolume"
+      ).value
+    ) / 100;
+
+
+  const audioVolume =
+    Number(
+      document.getElementById(
+        "audioVolume"
+      ).value
+    ) / 100;
+
+
+  video.volume =
+    videoVolume;
+
+  audio.volume =
+    audioVolume;
+
+
+  document.getElementById(
+    "videoVolumeValue"
+  ).innerText =
+    Math.round(
+      videoVolume * 100
+    ) + "%";
+
+
+  document.getElementById(
+    "audioVolumeValue"
+  ).innerText =
+    Math.round(
+      audioVolume * 100
+    ) + "%";
+
+}
+
+
+document
+.getElementById("videoVolume")
+.addEventListener(
+"input",
+updateVolumes
+);
+
+
+document
+.getElementById("audioVolume")
+.addEventListener(
+"input",
+updateVolumes
+);
+
+
+/* =========================
+   FORMAT
+========================= */
+
+format.addEventListener(
+"change",
+updateFormatInfo
+);
+
+
+function updateFormatInfo(){
+
+  if(format.value === "vertical"){
+
+    formatInfo.innerText =
+      "Current: 📱 9:16 Vertical — Shorts/Reels";
+
+  }
+
+  else if(format.value === "landscape"){
+
+    formatInfo.innerText =
+      "Current: 🖥️ 16:9 Landscape — YouTube";
+
+  }
+
+  else{
+
+    formatInfo.innerText =
+      "Current: ⬛ 1:1 Square";
+
+  }
+
+}
+
+
+/* =========================
+   SET START
+========================= */
+
+function setStart(){
+
+  if(!videoLoaded){
 
     alert(
-      "पहले video select करो"
+      "पहले Video select करो"
     );
 
     return;
   }
+
+
+  document.getElementById(
+    "start"
+  ).value =
+    video.currentTime.toFixed(1);
+
+
+  setStatus(
+    "✂️ Start time set"
+  );
+
+}
+
+
+/* =========================
+   SET END
+========================= */
+
+function setEnd(){
+
+  if(!videoLoaded){
+
+    alert(
+      "पहले Video select करो"
+    );
+
+    return;
+  }
+
+
+  document.getElementById(
+    "end"
+  ).value =
+    video.currentTime.toFixed(1);
+
+
+  setStatus(
+    "✂️ End time set"
+  );
+
+}
+
+
+/* =========================
+   RESET TRIM
+========================= */
+
+function resetTrim(){
+
+  if(!videoLoaded)
+    return;
+
+
+  document.getElementById(
+    "start"
+  ).value =
+    "0";
+
+
+  document.getElementById(
+    "end"
+  ).value =
+    video.duration.toFixed(1);
+
+
+  setStatus(
+    "↩️ Trim reset"
+  );
+
+}
+
+
+/* =========================
+   DRAW EDITED FRAME
+========================= */
+
+function drawEditedFrame(){
+
+  if(!videoLoaded ||
+     !video.videoWidth){
+
+    return;
+
+  }
+
+
+  let width;
+  let height;
+
+
+  if(format.value === "vertical"){
+
+    width = 720;
+    height = 1280;
+
+  }
+
+  else if(format.value === "square"){
+
+    width = 1080;
+    height = 1080;
+
+  }
+
+  else{
+
+    width = 1280;
+    height = 720;
+
+  }
+
+
+  canvas.width =
+    width;
+
+  canvas.height =
+    height;
+
+
+  /*
+    Background
+  */
+
+  ctx.fillStyle =
+    "#000";
+
+  ctx.fillRect(
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  /*
+    Cover crop
+  */
+
+  const scale =
+    Math.max(
+      width / video.videoWidth,
+      height / video.videoHeight
+    );
+
+
+  const newWidth =
+    video.videoWidth *
+    scale;
+
+
+  const newHeight =
+    video.videoHeight *
+    scale;
+
+
+  const x =
+    (width - newWidth) / 2;
+
+
+  const y =
+    (height - newHeight) / 2;
+
+
+  /*
+    Filter
+  */
+
+  ctx.filter =
+    document.getElementById(
+      "filter"
+    ).value;
+
+
+  ctx.drawImage(
+    video,
+    x,
+    y,
+    newWidth,
+    newHeight
+  );
+
+
+  ctx.filter =
+    "none";
+
+
+  /*
+    Caption
+  */
+
+  const text =
+    document.getElementById(
+      "videoText"
+    ).value.trim();
+
+
+  if(text){
+
+    ctx.font =
+      "bold " +
+      Math.max(
+        35,
+        width * .055
+      ) +
+      "px Arial";
+
+
+    ctx.textAlign =
+      "center";
+
+
+    ctx.textBaseline =
+      "bottom";
+
+
+    ctx.lineWidth =
+      6;
+
+
+    ctx.strokeStyle =
+      "#000";
+
+
+    ctx.fillStyle =
+      "#fff";
+
+
+    ctx.strokeText(
+      text,
+      width / 2,
+      height - 70
+    );
+
+
+    ctx.fillText(
+      text,
+      width / 2,
+      height - 70
+    );
+
+  }
+
+}
+
+
+/* =========================
+   PREVIEW
+========================= */
+
+async function previewEdit(){
+
+  if(!videoLoaded){
+
+    alert(
+      "पहले Video select करो"
+    );
+
+    return;
+  }
+
+
+  const start =
+    Number(
+      document.getElementById(
+        "start"
+      ).value
+    );
+
+
+  const end =
+    Number(
+      document.getElementById(
+        "end"
+      ).value
+    );
+
+
+  if(
+    isNaN(start) ||
+    isNaN(end) ||
+    end <= start
+  ){
+
+    alert(
+      "Start और End time सही करो"
+    );
+
+    return;
+  }
+
+
+  if(start < 0 ||
+     end > video.duration){
+
+    alert(
+      "Time video की सीमा के अंदर रखो"
+    );
+
+    return;
+  }
+
+
+  video.pause();
+
+  audio.pause();
+
+
+  video.currentTime =
+    start;
+
+
+  if(audioLoaded){
+
+    audio.currentTime =
+      0;
+
+  }
+
+
+  setStatus(
+    "▶️ Edited preview चल रहा है..."
+  );
+
 
   try{
 
     await video.play();
 
-    status.innerText =
-      "▶️ Video चल रहा है";
 
-  }catch(error){
+    if(audioLoaded){
 
-    console.log(error);
+      audio.play().catch(
+        ()=>{}
+      );
 
-    status.innerText =
-      "❌ Video play नहीं हुआ";
+    }
 
   }
+
+  catch(error){
+
+    setStatus(
+      "❌ Video play नहीं हुआ"
+    );
+
+    return;
+
+  }
+
+
+  video.ontimeupdate =
+    function(){
+
+      const elapsed =
+        video.currentTime -
+        start;
+
+
+      const total =
+        end - start;
+
+
+      setProgress(
+        (elapsed / total) * 100
+      );
+
+
+      if(
+        video.currentTime >= end
+      ){
+
+        video.pause();
+
+
+        if(audioLoaded)
+          audio.pause();
+
+
+        video.ontimeupdate =
+          null;
+
+
+        setProgress(100);
+
+
+        setStatus(
+          "✅ Preview finished"
+        );
+
+      }
+
+    };
 
 }
 
 
-/* =====================
-   PLAY AUDIO
-===================== */
+/* =========================
+   SMART SETTINGS
+========================= */
 
-async function playAudio(){
+function smartEdit(){
 
-  if(!audio.src){
+  if(!videoLoaded){
 
     alert(
-      "पहले audio select करो"
+      "पहले Video select करो"
     );
 
     return;
   }
 
-  try{
 
-    await audio.play();
+  const duration =
+    video.duration;
 
-    status.innerText =
-      "🎵 Audio चल रहा है";
 
-  }catch(error){
+  /*
+    Shorts के लिए
+    maximum 20 seconds
+  */
 
-    console.log(error);
+  let start = 0;
 
-    status.innerText =
-      "❌ Audio play नहीं हुआ";
+  let end =
+    Math.min(
+      duration,
+      20
+    );
+
+
+  if(duration > 30){
+
+    start =
+      Math.floor(
+        duration * .20
+      );
+
+
+    end =
+      Math.min(
+        duration,
+        start + 20
+      );
 
   }
 
+
+  document.getElementById(
+    "start"
+  ).value =
+    start.toFixed(1);
+
+
+  document.getElementById(
+    "end"
+  ).value =
+    end.toFixed(1);
+
+
+  format.value =
+    "vertical";
+
+
+  document.getElementById(
+    "videoText"
+  ).value =
+    "NAVAL GAMING 🔥";
+
+
+  document.getElementById(
+    "filter"
+  ).value =
+    "contrast(1.35) saturate(1.4)";
+
+
+  document.getElementById(
+    "videoVolume"
+  ).value =
+    "80";
+
+
+  document.getElementById(
+    "audioVolume"
+  ).value =
+    audioLoaded ? "25" : "0";
+
+
+  updateVolumes();
+
+  updateFormatInfo();
+
+
+  setProgress(100);
+
+
+  setStatus(
+    "🧠 Smart settings apply हो गईं — अब PLAY EDITED PREVIEW दबाओ"
+  );
+
 }
 
 
-/* =====================
-   STOP
-===================== */
+/* =========================
+   CHECK SETTINGS
+========================= */
 
-function stopAll(){
+function showEditInfo(){
 
-  video.pause();
-  audio.pause();
+  if(!videoLoaded){
 
-  video.currentTime = 0;
-  audio.currentTime = 0;
+    alert(
+      "पहले Video select करो"
+    );
 
-  status.innerText =
-    "⏹️ Stopped";
+    return;
+  }
+
+
+  const start =
+    document.getElementById(
+      "start"
+    ).value;
+
+
+  const end =
+    document.getElementById(
+      "end"
+    ).value;
+
+
+  const text =
+    document.getElementById(
+      "videoText"
+    ).value ||
+    "कोई caption नहीं";
+
+
+  let formatName;
+
+
+  if(format.value === "vertical"){
+
+    formatName =
+      "9:16 Shorts/Reels";
+
+  }
+
+  else if(format.value === "square"){
+
+    formatName =
+      "1:1 Square";
+
+  }
+
+  else{
+
+    formatName =
+      "16:9 YouTube";
+
+  }
+
+
+  alert(
+    "✅ EDIT SETTINGS\n\n" +
+    "✂️ Start: " + start + " sec\n" +
+    "⏱️ End: " + end + " sec\n" +
+    "📱 Format: " + formatName + "\n" +
+    "📝 Caption: " + text
+  );
 
 }
+
+
+/* =========================
+   RESET
+========================= */
+
+function resetEditor(){
+
+  location.reload();
+
+}
+
+
+/* =========================
+   INITIAL
+========================= */
+
+updateVolumes();
+
+updateFormatInfo();
 
 </script>
 
