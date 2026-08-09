@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>NAVAL AI VIDEO EDITOR V7</title>
+<title>NAVAL AI VIDEO EDITOR V8</title>
 
 <style>
 *{
@@ -93,13 +93,13 @@ button:disabled{
   opacity:.5;
 }
 
-.green{
-  background:#20d66b;
-}
-
 .purple{
   background:#8b4dff;
   color:white;
+}
+
+.green{
+  background:#20d66b;
 }
 
 .red{
@@ -157,18 +157,9 @@ canvas{
   font-size:13px;
 }
 
-.previewBox{
-  margin-top:12px;
-  padding:12px;
-  background:#101010;
-  border-radius:12px;
-  color:#aaa;
-  text-align:center;
-}
-
 .progressBox{
   width:100%;
-  height:10px;
+  height:11px;
   margin-top:12px;
   background:#292929;
   border-radius:20px;
@@ -179,7 +170,19 @@ canvas{
   width:0%;
   height:100%;
   background:#08cbea;
-  transition:.2s;
+  transition:.15s;
+}
+
+.downloadBox{
+  display:none;
+  margin-top:15px;
+}
+
+.notice{
+  color:#999;
+  font-size:13px;
+  line-height:1.5;
+  margin-top:10px;
 }
 </style>
 </head>
@@ -187,8 +190,8 @@ canvas{
 <body>
 
 <header>
-  <h1>🎬 NAVAL AI VIDEO EDITOR V7</h1>
-  <p>Smart Mobile Video Editing Studio</p>
+<h1>🎬 NAVAL AI VIDEO EDITOR V8</h1>
+<p>Trim • Filter • Caption • Music • Export</p>
 </header>
 
 <div class="container">
@@ -267,10 +270,6 @@ canvas{
 
 </select>
 
-<div class="previewBox" id="formatInfo">
-Current: 9:16 Vertical
-</div>
-
 </div>
 
 
@@ -317,7 +316,7 @@ Current: 9:16 Vertical
 
 <div class="card">
 
-<label>✂️ Start Time — seconds</label>
+<label>✂️ Start Time</label>
 
 <input
   type="number"
@@ -326,7 +325,7 @@ Current: 9:16 Vertical
   min="0"
   step="0.1">
 
-<label>⏱️ End Time — seconds</label>
+<label>⏱️ End Time</label>
 
 <input
   type="number"
@@ -338,18 +337,14 @@ Current: 9:16 Vertical
 <div class="row">
 
 <button onclick="setStart()">
-✂️ SET START
+SET START
 </button>
 
 <button onclick="setEnd()">
-✂️ SET END
+SET END
 </button>
 
 </div>
-
-<button onclick="resetTrim()">
-↩️ RESET TRIM
-</button>
 
 </div>
 
@@ -415,14 +410,21 @@ Normal
 
 <button
   class="purple"
+  id="smartButton"
   onclick="smartEdit()">
+
 🧠 SMART AUTO SETTINGS
+
 </button>
+
+<div class="notice">
+Smart mode Shorts format, trim, caption और cinematic filter automatically set करेगा।
+</div>
 
 </div>
 
 
-<!-- ACTIONS -->
+<!-- PREVIEW -->
 
 <div class="card">
 
@@ -430,14 +432,52 @@ Normal
 ▶️ PLAY EDITED PREVIEW
 </button>
 
+</div>
+
+
+<!-- EXPORT -->
+
+<div class="card">
+
 <button
-  class="green"
-  onclick="showEditInfo()">
-✅ CHECK EDIT SETTINGS
+  id="exportButton"
+  onclick="createEditedVideo()">
+
+🎬 CREATE EDITED VIDEO
+
 </button>
 
-<button onclick="resetEditor()">
+<div class="notice">
+Export browser में WebM format में बनेगा।
+</div>
+
+<div
+  class="downloadBox"
+  id="downloadBox">
+
+<button
+  class="green"
+  onclick="downloadEditedVideo()">
+
+⬇️ DOWNLOAD EDITED VIDEO
+
+</button>
+
+</div>
+
+</div>
+
+
+<!-- RESET -->
+
+<div class="card">
+
+<button
+  class="red"
+  onclick="resetEditor()">
+
 🔄 RESET ALL
+
 </button>
 
 </div>
@@ -450,7 +490,9 @@ Normal
 <div
   class="status"
   id="status">
+
 पहले Video select करो
+
 </div>
 
 <div class="progressBox">
@@ -506,11 +548,14 @@ document.getElementById("videoInfo");
 const audioInfo =
 document.getElementById("audioInfo");
 
-const format =
-document.getElementById("format");
+const exportButton =
+document.getElementById("exportButton");
 
-const formatInfo =
-document.getElementById("formatInfo");
+const smartButton =
+document.getElementById("smartButton");
+
+const downloadBox =
+document.getElementById("downloadBox");
 
 
 /* =========================
@@ -522,6 +567,12 @@ let audioURL = null;
 
 let videoLoaded = false;
 let audioLoaded = false;
+
+let editedBlob = null;
+let editedURL = null;
+
+let exporting = false;
+let animationID = null;
 
 
 /* =========================
@@ -593,8 +644,7 @@ function(){
 
 
   videoInfo.innerText =
-    "🎥 " +
-    file.name;
+    "🎥 " + file.name;
 
 
   setStatus(
@@ -618,9 +668,7 @@ function(){
 
       videoInfo.innerText =
         "✅ " +
-        Math.round(
-          video.duration
-        ) +
+        Math.round(video.duration) +
         " sec video";
 
 
@@ -635,10 +683,6 @@ function(){
 
 });
 
-
-/* =========================
-   VIDEO ERROR
-========================= */
 
 video.addEventListener(
 "error",
@@ -686,32 +730,18 @@ function(){
 
   audio.load();
 
+  audio.loop = true;
+
 
   audioLoaded = true;
 
 
   audioInfo.innerText =
-    "🎵 " +
-    file.name;
+    "🎵 " + file.name;
 
 
   setStatus(
     "🎵 Audio ready"
-  );
-
-});
-
-
-/* =========================
-   AUDIO ERROR
-========================= */
-
-audio.addEventListener(
-"error",
-function(){
-
-  setStatus(
-    "❌ Audio load नहीं हो पाया"
   );
 
 });
@@ -781,43 +811,7 @@ updateVolumes
 
 
 /* =========================
-   FORMAT
-========================= */
-
-format.addEventListener(
-"change",
-updateFormatInfo
-);
-
-
-function updateFormatInfo(){
-
-  if(format.value === "vertical"){
-
-    formatInfo.innerText =
-      "Current: 📱 9:16 Vertical — Shorts/Reels";
-
-  }
-
-  else if(format.value === "landscape"){
-
-    formatInfo.innerText =
-      "Current: 🖥️ 16:9 Landscape — YouTube";
-
-  }
-
-  else{
-
-    formatInfo.innerText =
-      "Current: ⬛ 1:1 Square";
-
-  }
-
-}
-
-
-/* =========================
-   SET START
+   TRIM
 ========================= */
 
 function setStart(){
@@ -845,10 +839,6 @@ function setStart(){
 }
 
 
-/* =========================
-   SET END
-========================= */
-
 function setEnd(){
 
   if(!videoLoaded){
@@ -875,79 +865,76 @@ function setEnd(){
 
 
 /* =========================
-   RESET TRIM
+   FORMAT SIZE
 ========================= */
 
-function resetTrim(){
+function getCanvasSize(){
 
-  if(!videoLoaded)
-    return;
-
-
-  document.getElementById(
-    "start"
-  ).value =
-    "0";
+  const format =
+    document.getElementById(
+      "format"
+    ).value;
 
 
-  document.getElementById(
-    "end"
-  ).value =
-    video.duration.toFixed(1);
+  if(format === "vertical"){
+
+    return {
+      width:720,
+      height:1280
+    };
+
+  }
 
 
-  setStatus(
-    "↩️ Trim reset"
-  );
+  if(format === "square"){
+
+    return {
+      width:1080,
+      height:1080
+    };
+
+  }
+
+
+  return {
+    width:1280,
+    height:720
+  };
 
 }
 
 
 /* =========================
-   DRAW EDITED FRAME
+   DRAW FRAME
 ========================= */
 
-function drawEditedFrame(){
+function drawFrame(){
 
-  if(!videoLoaded ||
-     !video.videoWidth){
+  if(
+    !video.videoWidth ||
+    !video.videoHeight
+  ){
 
     return;
-
   }
 
 
-  let width;
-  let height;
-
-
-  if(format.value === "vertical"){
-
-    width = 720;
-    height = 1280;
-
-  }
-
-  else if(format.value === "square"){
-
-    width = 1080;
-    height = 1080;
-
-  }
-
-  else{
-
-    width = 1280;
-    height = 720;
-
-  }
+  const size =
+    getCanvasSize();
 
 
   canvas.width =
-    width;
+    size.width;
 
   canvas.height =
-    height;
+    size.height;
+
+
+  const cw =
+    canvas.width;
+
+  const ch =
+    canvas.height;
 
 
   /*
@@ -960,42 +947,40 @@ function drawEditedFrame(){
   ctx.fillRect(
     0,
     0,
-    width,
-    height
+    cw,
+    ch
   );
 
 
   /*
-    Cover crop
+    COVER CROP
   */
 
   const scale =
     Math.max(
-      width / video.videoWidth,
-      height / video.videoHeight
+      cw / video.videoWidth,
+      ch / video.videoHeight
     );
 
 
-  const newWidth =
-    video.videoWidth *
-    scale;
+  const nw =
+    video.videoWidth * scale;
 
 
-  const newHeight =
-    video.videoHeight *
-    scale;
+  const nh =
+    video.videoHeight * scale;
 
 
   const x =
-    (width - newWidth) / 2;
+    (cw - nw) / 2;
 
 
   const y =
-    (height - newHeight) / 2;
+    (ch - nh) / 2;
 
 
   /*
-    Filter
+    FILTER
   */
 
   ctx.filter =
@@ -1008,8 +993,8 @@ function drawEditedFrame(){
     video,
     x,
     y,
-    newWidth,
-    newHeight
+    nw,
+    nh
   );
 
 
@@ -1018,7 +1003,7 @@ function drawEditedFrame(){
 
 
   /*
-    Caption
+    CAPTION
   */
 
   const text =
@@ -1033,7 +1018,7 @@ function drawEditedFrame(){
       "bold " +
       Math.max(
         35,
-        width * .055
+        cw * 0.055
       ) +
       "px Arial";
 
@@ -1047,7 +1032,7 @@ function drawEditedFrame(){
 
 
     ctx.lineWidth =
-      6;
+      7;
 
 
     ctx.strokeStyle =
@@ -1060,15 +1045,15 @@ function drawEditedFrame(){
 
     ctx.strokeText(
       text,
-      width / 2,
-      height - 70
+      cw / 2,
+      ch - 70
     );
 
 
     ctx.fillText(
       text,
-      width / 2,
-      height - 70
+      cw / 2,
+      ch - 70
     );
 
   }
@@ -1122,19 +1107,7 @@ async function previewEdit(){
   }
 
 
-  if(start < 0 ||
-     end > video.duration){
-
-    alert(
-      "Time video की सीमा के अंदर रखो"
-    );
-
-    return;
-  }
-
-
   video.pause();
-
   audio.pause();
 
 
@@ -1150,9 +1123,7 @@ async function previewEdit(){
   }
 
 
-  setStatus(
-    "▶️ Edited preview चल रहा है..."
-  );
+  setProgress(0);
 
 
   try{
@@ -1167,6 +1138,11 @@ async function previewEdit(){
       );
 
     }
+
+
+    setStatus(
+      "▶️ Preview चल रहा है..."
+    );
 
   }
 
@@ -1247,12 +1223,8 @@ function smartEdit(){
     video.duration;
 
 
-  /*
-    Shorts के लिए
-    maximum 20 seconds
-  */
-
   let start = 0;
+
 
   let end =
     Math.min(
@@ -1264,9 +1236,7 @@ function smartEdit(){
   if(duration > 30){
 
     start =
-      Math.floor(
-        duration * .20
-      );
+      duration * 0.20;
 
 
     end =
@@ -1290,7 +1260,9 @@ function smartEdit(){
     end.toFixed(1);
 
 
-  format.value =
+  document.getElementById(
+    "format"
+  ).value =
     "vertical";
 
 
@@ -1320,24 +1292,19 @@ function smartEdit(){
 
   updateVolumes();
 
-  updateFormatInfo();
-
-
-  setProgress(100);
-
 
   setStatus(
-    "🧠 Smart settings apply हो गईं — अब PLAY EDITED PREVIEW दबाओ"
+    "🧠 Smart settings apply हो गईं"
   );
 
 }
 
 
 /* =========================
-   CHECK SETTINGS
+   CREATE EDITED VIDEO
 ========================= */
 
-function showEditInfo(){
+async function createEditedVideo(){
 
   if(!videoLoaded){
 
@@ -1349,81 +1316,474 @@ function showEditInfo(){
   }
 
 
+  if(exporting)
+    return;
+
+
   const start =
-    document.getElementById(
-      "start"
-    ).value;
+    Number(
+      document.getElementById(
+        "start"
+      ).value
+    );
 
 
   const end =
-    document.getElementById(
-      "end"
-    ).value;
+    Number(
+      document.getElementById(
+        "end"
+      ).value
+    );
 
 
-  const text =
-    document.getElementById(
-      "videoText"
-    ).value ||
-    "कोई caption नहीं";
+  if(
+    isNaN(start) ||
+    isNaN(end) ||
+    end <= start
+  ){
 
+    alert(
+      "Start और End time सही करो"
+    );
 
-  let formatName;
-
-
-  if(format.value === "vertical"){
-
-    formatName =
-      "9:16 Shorts/Reels";
-
-  }
-
-  else if(format.value === "square"){
-
-    formatName =
-      "1:1 Square";
-
-  }
-
-  else{
-
-    formatName =
-      "16:9 YouTube";
-
+    return;
   }
 
 
-  alert(
-    "✅ EDIT SETTINGS\n\n" +
-    "✂️ Start: " + start + " sec\n" +
-    "⏱️ End: " + end + " sec\n" +
-    "📱 Format: " + formatName + "\n" +
-    "📝 Caption: " + text
+  if(
+    !window.MediaRecorder ||
+    !canvas.captureStream
+  ){
+
+    alert(
+      "इस browser में video export support नहीं है."
+    );
+
+    return;
+  }
+
+
+  exporting = true;
+
+  exportButton.disabled =
+    true;
+
+  smartButton.disabled =
+    true;
+
+
+  downloadBox.style.display =
+    "none";
+
+
+  setProgress(0);
+
+
+  try{
+
+    /*
+      Prepare canvas
+    */
+
+    drawFrame();
+
+
+    const canvasStream =
+      canvas.captureStream(30);
+
+
+    /*
+      VIDEO ONLY STREAM
+
+      यह सबसे stable mobile
+      browser export method है.
+    */
+
+    const recorder =
+      new MediaRecorder(
+        canvasStream,
+        {
+          mimeType:
+            getMimeType()
+        }
+      );
+
+
+    const chunks = [];
+
+
+    recorder.ondataavailable =
+      function(event){
+
+        if(
+          event.data &&
+          event.data.size > 0
+        ){
+
+          chunks.push(
+            event.data
+          );
+
+        }
+
+      };
+
+
+    recorder.onstop =
+      function(){
+
+        editedBlob =
+          new Blob(
+            chunks,
+            {
+              type:
+                recorder.mimeType
+            }
+          );
+
+
+        if(editedURL){
+
+          URL.revokeObjectURL(
+            editedURL
+          );
+
+        }
+
+
+        editedURL =
+          URL.createObjectURL(
+            editedBlob
+          );
+
+
+        exporting = false;
+
+        exportButton.disabled =
+          false;
+
+        smartButton.disabled =
+          false;
+
+
+        downloadBox.style.display =
+          "block";
+
+
+        setProgress(100);
+
+
+        setStatus(
+          "✅ Edited video तैयार है!"
+        );
+
+      };
+
+
+    /*
+      Stop playback
+    */
+
+    video.pause();
+    audio.pause();
+
+
+    /*
+      Seek to start
+    */
+
+    video.currentTime =
+      start;
+
+
+    await waitForSeek();
+
+
+    /*
+      Start recorder
+    */
+
+    recorder.start(200);
+
+
+    /*
+      Play video
+    */
+
+    await video.play();
+
+
+    /*
+      Background music is
+      previewed separately.
+      It is NOT mixed into
+      export in this stable V8.
+    */
+
+    if(audioLoaded){
+
+      audio.currentTime =
+        0;
+
+      audio.play().catch(
+        ()=>{}
+      );
+
+    }
+
+
+    /*
+      Render loop
+    */
+
+    function render(){
+
+      if(
+        video.paused ||
+        video.ended
+      ){
+
+        return;
+      }
+
+
+      drawFrame();
+
+
+      const elapsed =
+        video.currentTime -
+        start;
+
+
+      const total =
+        end -
+        start;
+
+
+      const percent =
+        (
+          elapsed /
+          total
+        ) * 100;
+
+
+      setProgress(
+        Math.min(
+          95,
+          percent
+        )
+      );
+
+
+      animationID =
+        requestAnimationFrame(
+          render
+        );
+
+    }
+
+
+    render();
+
+
+    /*
+      Stop at end
+    */
+
+    video.ontimeupdate =
+      function(){
+
+        if(
+          video.currentTime >= end
+        ){
+
+          video.pause();
+
+
+          if(audioLoaded)
+            audio.pause();
+
+
+          cancelAnimationFrame(
+            animationID
+          );
+
+
+          video.ontimeupdate =
+            null;
+
+
+          drawFrame();
+
+
+          recorder.stop();
+
+        }
+
+      };
+
+  }
+
+  catch(error){
+
+    console.error(error);
+
+
+    exporting = false;
+
+    exportButton.disabled =
+      false;
+
+    smartButton.disabled =
+      false;
+
+
+    setProgress(0);
+
+
+    setStatus(
+      "❌ Export failed"
+    );
+
+
+    alert(
+      "Export नहीं हो पाया। छोटी video से दोबारा try करो."
+    );
+
+  }
+
+}
+
+
+/* =========================
+   MIME TYPE
+========================= */
+
+function getMimeType(){
+
+  const types = [
+
+    "video/webm;codecs=vp9",
+
+    "video/webm;codecs=vp8",
+
+    "video/webm"
+
+  ];
+
+
+  for(
+    let i = 0;
+    i < types.length;
+    i++
+  ){
+
+    if(
+      MediaRecorder
+      .isTypeSupported(
+        types[i]
+      )
+    ){
+
+      return types[i];
+
+    }
+
+  }
+
+
+  return "";
+
+}
+
+
+/* =========================
+   WAIT FOR SEEK
+========================= */
+
+function waitForSeek(){
+
+  return new Promise(
+    function(resolve){
+
+      if(
+        Math.abs(
+          video.currentTime -
+          Number(
+            document.getElementById(
+              "start"
+            ).value
+          )
+        ) < 0.05
+      ){
+
+        resolve();
+
+        return;
+
+      }
+
+
+      const handler =
+        function(){
+
+          video.removeEventListener(
+            "seeked",
+            handler
+          );
+
+          resolve();
+
+        };
+
+
+      video.addEventListener(
+        "seeked",
+        handler
+      );
+
+    }
   );
 
 }
 
 
 /* =========================
-   RESET
+   DOWNLOAD
 ========================= */
 
-function resetEditor(){
+function downloadEditedVideo(){
 
-  location.reload();
+  if(!editedBlob){
 
-}
+    alert(
+      "पहले video create करो"
+    );
+
+    return;
+  }
 
 
-/* =========================
-   INITIAL
-========================= */
+  const link =
+    document.createElement(
+      "a"
+    );
 
-updateVolumes();
 
-updateFormatInfo();
+  link.href =
+    editedURL;
 
-</script>
 
-</body>
-  </html>
+  link.download =
+    "NAVAL_EDITED_VIDEO.webm";
+
+
+  document.body.appendChild(
+    link
+  );
+
+
+  link.click();
+
+
+  link.remove();
