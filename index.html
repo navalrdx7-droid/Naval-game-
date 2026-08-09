@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>NAVAL AI VIDEO EDITOR V3</title>
+<title>NAVAL AI VIDEO EDITOR V4</title>
 
 <style>
 
@@ -84,6 +84,7 @@ button{
   color:#000;
   font-weight:bold;
   font-size:17px;
+  cursor:pointer;
 }
 
 button:active{
@@ -98,6 +99,11 @@ button:disabled{
   background:#8b4dff;
   color:white;
   font-size:20px;
+}
+
+.aiTest{
+  background:#ff9f1c;
+  color:#000;
 }
 
 .green{
@@ -182,22 +188,32 @@ canvas{
   line-height:1.5;
 }
 
+.aiResult{
+  display:none;
+  margin-top:12px;
+  padding:14px;
+  background:#101010;
+  border:1px solid #333;
+  border-radius:12px;
+  line-height:1.6;
+}
+
+.aiOn{
+  color:#20d66b;
+  font-weight:bold;
+}
+
 </style>
 </head>
 
 <body>
 
 <header>
-
-<h1>🧠 NAVAL AI VIDEO EDITOR V3</h1>
-
+<h1>🧠 NAVAL AI VIDEO EDITOR V4</h1>
 <p>Smart Automatic Editing Studio</p>
-
 </header>
 
-
 <div class="container">
-
 
 <!-- VIDEO -->
 
@@ -208,8 +224,7 @@ canvas{
 <input
 type="file"
 id="videoFile"
-accept="video/*"
->
+accept="video/*">
 
 <video
 id="video"
@@ -261,8 +276,7 @@ No video selected
 <input
 type="file"
 id="musicFile"
-accept="audio/*"
->
+accept="audio/*">
 
 <audio
 id="music"
@@ -277,15 +291,12 @@ controls>
 <div class="card">
 
 <label>
-
 🔊 Original Video
-
 <span
 class="value"
 id="videoVolumeValue">
 100%
 </span>
-
 </label>
 
 <input
@@ -293,19 +304,15 @@ type="range"
 id="videoVolume"
 min="0"
 max="100"
-value="100"
->
+value="100">
 
 <label>
-
 🎵 Background Music
-
 <span
 class="value"
 id="musicVolumeValue">
 30%
 </span>
-
 </label>
 
 <input
@@ -313,8 +320,7 @@ type="range"
 id="musicVolume"
 min="0"
 max="100"
-value="30"
->
+value="30">
 
 </div>
 
@@ -330,8 +336,7 @@ type="number"
 id="start"
 value="0"
 min="0"
-step="0.1"
->
+step="0.1">
 
 <label>⏱️ End Time</label>
 
@@ -340,8 +345,7 @@ type="number"
 id="end"
 value="0"
 min="0"
-step="0.1"
->
+step="0.1">
 
 <div class="row">
 
@@ -367,8 +371,7 @@ SET END
 <input
 type="text"
 id="videoText"
-placeholder="NAVAL GAMING 🔥"
->
+placeholder="NAVAL GAMING 🔥">
 
 </div>
 
@@ -444,11 +447,32 @@ onclick="smartAIEdit()">
 
 </button>
 
+<button
+class="aiTest"
+id="aiTestButton"
+onclick="testAIBackend()">
+
+🧪 TEST AI BACKEND
+
+</button>
+
 <div class="smartInfo">
 
-Smart mode automatically chooses an editing section,
-Shorts/Reels format, cinematic style, text and audio settings.
+Smart AI backend:
+<br>
+<span class="aiOn">● Scene Analysis</span>
+<br>
+<span class="aiOn">● Smart Editing</span>
+<br>
+<span class="aiOn">● Shorts Format</span>
+<br>
+<span class="aiOn">● Caption Ready</span>
 
+</div>
+
+<div
+class="aiResult"
+id="aiResult">
 </div>
 
 </div>
@@ -509,66 +533,67 @@ id="progressBar">
 
 </div>
 
-
 </div>
-
 
 <canvas id="canvas"></canvas>
 
 
 <script>
 
-
-const video=
+const video =
 document.getElementById("video");
 
-const music=
+const music =
 document.getElementById("music");
 
-const canvas=
+const canvas =
 document.getElementById("canvas");
 
-const ctx=
+const ctx =
 canvas.getContext("2d");
 
-const statusText=
+const statusText =
 document.getElementById("status");
 
-const progressBar=
+const progressBar =
 document.getElementById("progressBar");
 
-const smartButton=
+const smartButton =
 document.getElementById("smartButton");
 
-const downloadButton=
+const aiTestButton =
+document.getElementById("aiTestButton");
+
+const downloadButton =
 document.getElementById("downloadButton");
 
+const aiResult =
+document.getElementById("aiResult");
 
-let videoURL="";
-let musicURL="";
 
-let videoFileSelected=false;
-let musicFileSelected=false;
+let videoURL = "";
+let musicURL = "";
 
-let audioContext=null;
+let videoFileSelected = false;
+let musicFileSelected = false;
 
-let videoSource=null;
-let musicSource=null;
+let audioContext = null;
 
-let editedBlob=null;
-let editedURL="";
+let videoSource = null;
+let musicSource = null;
 
-let animationID=null;
+let editedBlob = null;
+let editedURL = "";
 
-let exporting=false;
+let animationID = null;
+
+let exporting = false;
 
 
 /* STATUS */
 
 function setStatus(text){
-
-  statusText.innerText=text;
-
+  statusText.innerText = text;
 }
 
 
@@ -576,14 +601,13 @@ function setStatus(text){
 
 function setProgress(value){
 
-  value=Math.max(
+  value = Math.max(
     0,
     Math.min(100,value)
   );
 
-  progressBar.style.width=
-    value+"%";
-
+  progressBar.style.width =
+    value + "%";
 }
 
 
@@ -594,18 +618,18 @@ function setupAudio(){
   if(audioContext)
     return;
 
-  audioContext=
+  audioContext =
     new(
       window.AudioContext ||
       window.webkitAudioContext
     )();
 
-  videoSource=
+  videoSource =
     audioContext.createMediaElementSource(
       video
     );
 
-  musicSource=
+  musicSource =
     audioContext.createMediaElementSource(
       music
     );
@@ -617,7 +641,6 @@ function setupAudio(){
   musicSource.connect(
     audioContext.destination
   );
-
 }
 
 
@@ -625,40 +648,36 @@ function setupAudio(){
 
 function updateVolumes(){
 
-  const videoVolume=
+  const videoVolume =
     Number(
       document.getElementById(
         "videoVolume"
       ).value
-    )/100;
+    ) / 100;
 
-  const musicVolume=
+  const musicVolume =
     Number(
       document.getElementById(
         "musicVolume"
       ).value
-    )/100;
+    ) / 100;
 
   document.getElementById(
     "videoVolumeValue"
-  ).innerText=
+  ).innerText =
     Math.round(
-      videoVolume*100
-    )+"%";
+      videoVolume * 100
+    ) + "%";
 
   document.getElementById(
     "musicVolumeValue"
-  ).innerText=
+  ).innerText =
     Math.round(
-      musicVolume*100
-    )+"%";
+      musicVolume * 100
+    ) + "%";
 
-  video.volume=
-    videoVolume;
-
-  music.volume=
-    musicVolume;
-
+  video.volume = videoVolume;
+  music.volume = musicVolume;
 }
 
 
@@ -668,7 +687,6 @@ document
   "input",
   updateVolumes
 );
-
 
 document
 .getElementById("musicVolume")
@@ -686,44 +704,42 @@ document
   "change",
   function(){
 
-    const file=
-      this.files[0];
+    const file = this.files[0];
 
     if(!file)
       return;
 
-    videoFileSelected=true;
+    videoFileSelected = true;
 
     if(videoURL)
       URL.revokeObjectURL(
         videoURL
       );
 
-    videoURL=
+    videoURL =
       URL.createObjectURL(file);
 
-    video.src=
-      videoURL;
+    video.src = videoURL;
 
-    video.onloadedmetadata=
+    video.onloadedmetadata =
       function(){
 
         document.getElementById(
           "start"
-        ).value=0;
+        ).value = 0;
 
         document.getElementById(
           "end"
-        ).value=
+        ).value =
           video.duration.toFixed(1);
 
         document.getElementById(
           "videoInfo"
-        ).innerText=
-          "🎥 "+
+        ).innerText =
+          "🎥 " +
           Math.round(
             video.duration
-          )+
+          ) +
           " sec video";
 
         setStatus(
@@ -746,26 +762,24 @@ document
   "change",
   function(){
 
-    const file=
-      this.files[0];
+    const file = this.files[0];
 
     if(!file)
       return;
 
-    musicFileSelected=true;
+    musicFileSelected = true;
 
     if(musicURL)
       URL.revokeObjectURL(
         musicURL
       );
 
-    musicURL=
+    musicURL =
       URL.createObjectURL(file);
 
-    music.src=
-      musicURL;
+    music.src = musicURL;
 
-    music.loop=true;
+    music.loop = true;
 
     setStatus(
       "🎵 Music loaded"
@@ -790,13 +804,12 @@ function setStart(){
 
   document.getElementById(
     "start"
-  ).value=
+  ).value =
     video.currentTime.toFixed(1);
 
   setStatus(
     "✂️ Start set"
   );
-
 }
 
 
@@ -815,13 +828,12 @@ function setEnd(){
 
   document.getElementById(
     "end"
-  ).value=
+  ).value =
     video.currentTime.toFixed(1);
 
   setStatus(
     "✂️ End set"
   );
-
 }
 
 
@@ -832,7 +844,6 @@ function getFormat(){
   return document.getElementById(
     "format"
   ).value;
-
 }
 
 
@@ -843,38 +854,33 @@ function drawFrame(){
   if(!video.videoWidth)
     return;
 
-
-  const format=
+  const format =
     getFormat();
-
 
   let cw;
   let ch;
 
+  if(format === "vertical"){
 
-  if(format==="vertical"){
+    cw = 720;
+    ch = 1280;
 
-    cw=720;
-    ch=1280;
+  }else if(format === "square"){
 
-  }else if(format==="square"){
-
-    cw=1080;
-    ch=1080;
+    cw = 1080;
+    ch = 1080;
 
   }else{
 
-    cw=1280;
-    ch=720;
+    cw = 1280;
+    ch = 720;
 
   }
 
+  canvas.width = cw;
+  canvas.height = ch;
 
-  canvas.width=cw;
-  canvas.height=ch;
-
-
-  ctx.fillStyle="#000";
+  ctx.fillStyle = "#000";
 
   ctx.fillRect(
     0,
@@ -883,37 +889,28 @@ function drawFrame(){
     ch
   );
 
-
-  /*
-    COVER CROP
-  */
-
-  const scale=
+  const scale =
     Math.max(
-      cw/video.videoWidth,
-      ch/video.videoHeight
+      cw / video.videoWidth,
+      ch / video.videoHeight
     );
 
+  const nw =
+    video.videoWidth * scale;
 
-  const nw=
-    video.videoWidth*scale;
+  const nh =
+    video.videoHeight * scale;
 
-  const nh=
-    video.videoHeight*scale;
+  const x =
+    (cw - nw) / 2;
 
+  const y =
+    (ch - nh) / 2;
 
-  const x=
-    (cw-nw)/2;
-
-  const y=
-    (ch-nh)/2;
-
-
-  ctx.filter=
+  ctx.filter =
     document.getElementById(
       "filter"
     ).value;
-
 
   ctx.drawImage(
     video,
@@ -923,54 +920,44 @@ function drawFrame(){
     nh
   );
 
+  ctx.filter = "none";
 
-  ctx.filter="none";
 
-
-  /*
-    TEXT
-  */
-
-  const text=
+  const text =
     document.getElementById(
       "videoText"
     ).value.trim();
 
-
   if(text){
 
-    ctx.font=
-      "bold "+
+    ctx.font =
+      "bold " +
       Math.max(
         35,
-        cw*.055
-      )+
+        cw * .055
+      ) +
       "px Arial";
 
-    ctx.textAlign="center";
+    ctx.textAlign = "center";
 
-    ctx.textBaseline="bottom";
+    ctx.textBaseline = "bottom";
 
-    ctx.lineWidth=6;
+    ctx.lineWidth = 6;
 
-    ctx.strokeStyle=
-      "black";
+    ctx.strokeStyle = "black";
 
-    ctx.fillStyle=
-      "white";
-
+    ctx.fillStyle = "white";
 
     ctx.strokeText(
       text,
-      cw/2,
-      ch-70
+      cw / 2,
+      ch - 70
     );
-
 
     ctx.fillText(
       text,
-      cw/2,
-      ch-70
+      cw / 2,
+      ch - 70
     );
 
   }
@@ -991,24 +978,21 @@ async function previewEdit(){
     return;
   }
 
-
-  const start=
+  const start =
     Number(
       document.getElementById(
         "start"
       ).value
     );
 
-
-  const end=
+  const end =
     Number(
       document.getElementById(
         "end"
       ).value
     );
 
-
-  if(end<=start){
+  if(end <= start){
 
     alert(
       "End time सही करो"
@@ -1017,21 +1001,17 @@ async function previewEdit(){
     return;
   }
 
-
-  video.currentTime=
-    start;
-
+  video.currentTime = start;
 
   if(musicFileSelected){
 
-    music.currentTime=0;
+    music.currentTime = 0;
 
     music.play().catch(
       ()=>{}
     );
 
   }
-
 
   try{
 
@@ -1043,17 +1023,15 @@ async function previewEdit(){
 
   }
 
-
   setStatus(
     "▶️ Preview चल रहा है..."
   );
 
-
-  video.ontimeupdate=
+  video.ontimeupdate =
     function(){
 
       if(
-        video.currentTime>=end
+        video.currentTime >= end
       ){
 
         video.pause();
@@ -1061,7 +1039,7 @@ async function previewEdit(){
         if(musicFileSelected)
           music.pause();
 
-        video.ontimeupdate=null;
+        video.ontimeupdate = null;
 
         setStatus(
           "✅ Preview finished"
@@ -1070,7 +1048,157 @@ async function previewEdit(){
       }
 
     };
+}
 
+
+/* =================================
+   TEST VERCEL AI BACKEND
+================================= */
+
+async function testAIBackend(){
+
+  if(!videoFileSelected){
+
+    alert(
+      "पहले video select करो"
+    );
+
+    return;
+  }
+
+  aiTestButton.disabled = true;
+
+  setProgress(10);
+
+  setStatus(
+    "🧠 NAVAL AI Backend से connect हो रहा है..."
+  );
+
+  aiResult.style.display = "none";
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/ai",
+        {
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:JSON.stringify({
+
+            duration:
+              video.duration || 0,
+
+            format:
+              document.getElementById(
+                "format"
+              ).value,
+
+            text:
+              document.getElementById(
+                "videoText"
+              ).value
+
+          })
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(!response.ok){
+
+      throw new Error(
+        data.message ||
+        "Backend error"
+      );
+
+    }
+
+
+    if(data.success){
+
+      setProgress(100);
+
+      setStatus(
+        "✅ NAVAL AI BACKEND CONNECTED"
+      );
+
+
+      aiResult.innerHTML =
+
+        "✅ <b>AI Backend Connected</b><br><br>" +
+
+        "🧠 Scene Detection: " +
+        (data.smartEdit?.sceneDetection
+          ? "ON"
+          : "OFF") +
+
+        "<br>" +
+
+        "✂️ Smart Cuts: " +
+        (data.smartEdit?.smartCuts
+          ? "ON"
+          : "OFF") +
+
+        "<br>" +
+
+        "📝 Captions: " +
+        (data.smartEdit?.captions
+          ? "ON"
+          : "OFF") +
+
+        "<br>" +
+
+        "📱 Shorts Mode: " +
+        (data.smartEdit?.shortsFormat
+          ? "ON"
+          : "OFF");
+
+      aiResult.style.display = "block";
+
+      alert(
+        "✅ NAVAL AI BACKEND CONNECTED!"
+      );
+
+    }else{
+
+      throw new Error(
+        "AI response invalid"
+      );
+
+    }
+
+  }catch(error){
+
+    console.error(error);
+
+    setProgress(0);
+
+    setStatus(
+      "❌ AI Backend connect नहीं हुआ"
+    );
+
+    aiResult.innerHTML =
+      "❌ Backend connection failed.<br><br>" +
+      "Vercel deployment और /api/ai check करें.";
+
+    aiResult.style.display = "block";
+
+    alert(
+      "AI Backend से connection नहीं हुआ."
+    );
+
+  }
+
+  aiTestButton.disabled = false;
 }
 
 
@@ -1089,18 +1217,15 @@ async function smartAIEdit(){
     return;
   }
 
-
   if(exporting)
     return;
 
-
-  const duration=
+  const duration =
     video.duration;
-
 
   if(
     !duration ||
-    duration<=0
+    duration <= 0
   ){
 
     alert(
@@ -1110,64 +1235,53 @@ async function smartAIEdit(){
     return;
   }
 
-
-  smartButton.disabled=true;
-
+  smartButton.disabled = true;
 
   setStatus(
     "🧠 Video analyze हो रहा है..."
   );
 
-
   setProgress(5);
 
 
   /*
-    SMART SEGMENT SELECTION
-
-    अभी browser-based heuristic है।
+    Local smart editing
   */
 
+  let start = 0;
+  let end = duration;
 
-  let start=0;
-  let end=duration;
+  if(duration <= 15){
 
+    start = 0;
+    end = duration;
 
-  if(duration<=15){
+  }else if(duration <= 40){
 
-    start=0;
-    end=duration;
-
-  }else if(duration<=40){
-
-    start=
+    start =
       Math.max(
         0,
-        duration*.10
+        duration * .10
       );
 
-    end=
+    end =
       Math.min(
         duration,
-        start+20
+        start + 20
       );
 
   }else{
 
-    /*
-      Middle highlight
-    */
-
-    start=
+    start =
       Math.max(
         0,
-        duration*.25
+        duration * .25
       );
 
-    end=
+    end =
       Math.min(
         duration,
-        start+20
+        start + 20
       );
 
   }
@@ -1175,109 +1289,135 @@ async function smartAIEdit(){
 
   document.getElementById(
     "start"
-  ).value=
+  ).value =
     start.toFixed(1);
-
 
   document.getElementById(
     "end"
-  ).value=
+  ).value =
     end.toFixed(1);
 
 
-  /*
-    SMART FORMAT
-  */
-
   document.getElementById(
     "format"
-  ).value=
+  ).value =
     "vertical";
 
 
-  /*
-    SMART TEXT
-  */
-
   document.getElementById(
     "videoText"
-  ).value=
+  ).value =
     "NAVAL GAMING 🔥";
 
 
-  /*
-    SMART STYLE
-  */
-
   document.getElementById(
     "filter"
-  ).value=
+  ).value =
     "contrast(1.35) saturate(1.4)";
 
 
-  /*
-    SMART EFFECT
-  */
-
   document.getElementById(
     "effect"
-  ).value=
+  ).value =
     "fade";
 
 
-  /*
-    SMART AUDIO
-  */
-
   document.getElementById(
     "videoVolume"
-  ).value=80;
+  ).value = 80;
 
   document.getElementById(
     "musicVolume"
-  ).value=
+  ).value =
     musicFileSelected
-    ? 25
-    : 0;
+      ? 25
+      : 0;
 
 
   updateVolumes();
 
-
-  setProgress(15);
-
+  setProgress(20);
 
   setStatus(
-    "🧠 Smart decisions तैयार..."
+    "🧠 Smart settings तैयार..."
   );
 
 
   /*
-    SMALL DELAY
-    ताकि UI update दिखे
+    Try backend analysis
   */
 
+  try{
+
+    const response =
+      await fetch(
+        "/api/ai",
+        {
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:JSON.stringify({
+
+            duration: duration,
+
+            format:"vertical",
+
+            text:
+              document.getElementById(
+                "videoText"
+              ).value
+
+          })
+        }
+      );
+
+
+    if(response.ok){
+
+      const data =
+        await response.json();
+
+      if(data.success){
+
+        setStatus(
+          "🧠 AI analysis complete..."
+        );
+
+        setProgress(30);
+
+      }
+
+    }
+
+  }catch(error){
+
+    console.log(
+      "Backend unavailable, local smart mode used."
+    );
+
+  }
+
+
   await new Promise(
-    resolve=>
+    resolve =>
       setTimeout(
         resolve,
-        700
+        500
       )
   );
-
-
-  setProgress(25);
 
 
   setStatus(
     "🎬 Smart Auto Edit शुरू..."
   );
 
-
   await createEditedVideo(true);
 
-
-  smartButton.disabled=false;
+  smartButton.disabled = false;
 
 }
 
@@ -1285,7 +1425,7 @@ async function smartAIEdit(){
 /* CREATE VIDEO */
 
 async function createEditedVideo(
-  automatic=false
+  automatic = false
 ){
 
   if(!videoFileSelected){
@@ -1297,20 +1437,18 @@ async function createEditedVideo(
     return;
   }
 
-
   if(exporting)
     return;
 
 
-  const start=
+  const start =
     Number(
       document.getElementById(
         "start"
       ).value
     );
 
-
-  const end=
+  const end =
     Number(
       document.getElementById(
         "end"
@@ -1318,7 +1456,7 @@ async function createEditedVideo(
     );
 
 
-  if(end<=start){
+  if(end <= start){
 
     alert(
       "End time सही करो"
@@ -1328,22 +1466,19 @@ async function createEditedVideo(
   }
 
 
-  exporting=true;
+  exporting = true;
 
+  smartButton.disabled = true;
 
-  smartButton.disabled=true;
-
-  downloadButton.disabled=true;
+  downloadButton.disabled = true;
 
 
   try{
 
-
     setupAudio();
 
-
     if(
-      audioContext.state===
+      audioContext.state ===
       "suspended"
     ){
 
@@ -1354,55 +1489,46 @@ async function createEditedVideo(
 
     setStatus(
       automatic
-      ? "🧠 Smart AI editing..."
-      : "🎬 Video export..."
+        ? "🧠 Smart AI editing..."
+        : "🎬 Video export..."
     );
-
 
     setProgress(30);
 
 
-    /*
-      CANVAS
-    */
-
     drawFrame();
 
 
-    const canvasStream=
+    const canvasStream =
       canvas.captureStream(30);
 
 
-    /*
-      AUDIO
-    */
-
-    const destination=
+    const destination =
       audioContext
       .createMediaStreamDestination();
 
 
-    const videoGain=
+    const videoGain =
       audioContext.createGain();
 
-    const musicGain=
+    const musicGain =
       audioContext.createGain();
 
 
-    videoGain.gain.value=
+    videoGain.gain.value =
       Number(
         document.getElementById(
           "videoVolume"
         ).value
-      )/100;
+      ) / 100;
 
 
-    musicGain.gain.value=
+    musicGain.gain.value =
       Number(
         document.getElementById(
           "musicVolume"
         ).value
-      )/100;
+      ) / 100;
 
 
     videoSource.connect(
@@ -1423,18 +1549,14 @@ async function createEditedVideo(
     );
 
 
-    /*
-      COMBINED STREAM
-    */
-
-    const combinedStream=
+    const combinedStream =
       new MediaStream();
 
 
     canvasStream
       .getVideoTracks()
       .forEach(
-        track=>
+        track =>
           combinedStream.addTrack(
             track
           )
@@ -1445,18 +1567,14 @@ async function createEditedVideo(
       .stream
       .getAudioTracks()
       .forEach(
-        track=>
+        track =>
           combinedStream.addTrack(
             track
           )
       );
 
 
-    /*
-      RECORDER
-    */
-
-    let mime=
+    let mime =
       "video/webm;codecs=vp9,opus";
 
 
@@ -1465,7 +1583,7 @@ async function createEditedVideo(
       .isTypeSupported(mime)
     ){
 
-      mime=
+      mime =
         "video/webm;codecs=vp8,opus";
 
     }
@@ -1476,13 +1594,13 @@ async function createEditedVideo(
       .isTypeSupported(mime)
     ){
 
-      mime=
+      mime =
         "video/webm";
 
     }
 
 
-    const recorder=
+    const recorder =
       new MediaRecorder(
         combinedStream,
         {
@@ -1491,317 +1609,20 @@ async function createEditedVideo(
       );
 
 
-    const chunks=[];
+    const chunks = [];
 
 
-    recorder.ondataavailable=
+    recorder.ondataavailable =
       function(e){
 
-        if(e.data.size>0)
+        if(e.data.size > 0)
           chunks.push(e.data);
 
       };
 
 
-    recorder.onstop=
+    recorder.onstop =
       function(){
 
-        editedBlob=
-          new Blob(
-            chunks,
-            {
-              type:
-                recorder.mimeType
-            }
-          );
-
-
-        if(editedURL){
-
-          URL.revokeObjectURL(
-            editedURL
-          );
-
-        }
-
-
-        editedURL=
-          URL.createObjectURL(
-            editedBlob
-          );
-
-
-        try{
-
-          videoSource.disconnect(
-            videoGain
-          );
-
-          musicSource.disconnect(
-            musicGain
-          );
-
-        }catch(e){}
-
-
-        exporting=false;
-
-
-        smartButton.disabled=false;
-
-        downloadButton.disabled=false;
-
-
-        setProgress(100);
-
-
-        setStatus(
-          "✅ Smart Edit तैयार है! DOWNLOAD दबाओ."
-        );
-
-      };
-
-
-    /*
-      SEEK
-    */
-
-    video.pause();
-
-    if(musicFileSelected)
-      music.pause();
-
-
-    video.currentTime=
-      start;
-
-
-    await new Promise(
-      resolve=>{
-
-        const handler=
-          function(){
-
-            video.removeEventListener(
-              "seeked",
-              handler
-            );
-
-            resolve();
-
-          };
-
-
-        video.addEventListener(
-          "seeked",
-          handler
-        );
-
-      }
-    );
-
-
-    /*
-      START RECORD
-    */
-
-    recorder.start(200);
-
-
-    if(musicFileSelected){
-
-      music.currentTime=0;
-
-      music.loop=true;
-
-      music.play().catch(
-        ()=>{}
-      );
-
-    }
-
-
-    await video.play();
-
-
-    /*
-      RENDER LOOP
-    */
-
-    function render(){
-
-      if(
-        video.paused ||
-        video.ended
-      )
-        return;
-
-
-      drawFrame();
-
-
-      const elapsed=
-        video.currentTime-start;
-
-
-      const total=
-        end-start;
-
-
-      const percent=
-        30+
-        (
-          elapsed/total
-        )*65;
-
-
-      setProgress(
-        Math.min(
-          95,
-          percent
-        )
-      );
-
-
-      animationID=
-        requestAnimationFrame(
-          render
-        );
-
-    }
-
-
-    render();
-
-
-    /*
-      STOP
-    */
-
-    video.ontimeupdate=
-      function(){
-
-        if(
-          video.currentTime>=end
-        ){
-
-          video.pause();
-
-
-          if(musicFileSelected)
-            music.pause();
-
-
-          cancelAnimationFrame(
-            animationID
-          );
-
-
-          video.ontimeupdate=null;
-
-
-          drawFrame();
-
-
-          recorder.stop();
-
-        }
-
-      };
-
-
-  }catch(error){
-
-    console.error(error);
-
-
-    exporting=false;
-
-
-    smartButton.disabled=false;
-
-    downloadButton.disabled=false;
-
-
-    setProgress(0);
-
-
-    setStatus(
-      "❌ Smart Edit failed"
-    );
-
-
-    alert(
-      "Browser इस format को export नहीं कर पाया."
-    );
-
-  }
-
-}
-
-
-/* DOWNLOAD */
-
-function downloadEditedVideo(){
-
-  if(!editedBlob){
-
-    alert(
-      "पहले Smart Edit करो"
-    );
-
-    return;
-  }
-
-
-  const link=
-    document.createElement(
-      "a"
-    );
-
-
-  link.href=
-    editedURL;
-
-
-  link.download=
-    "NAVAL_SMART_AI_EDIT.webm";
-
-
-  document.body.appendChild(
-    link
-  );
-
-
-  link.click();
-
-
-  link.remove();
-
-
-  setStatus(
-    "⬇️ Download started"
-  );
-
-}
-
-
-/* RESET */
-
-function resetEditor(){
-
-  location.reload();
-
-}
-
-
-/* INITIAL */
-
-downloadButton.disabled=true;
-
-updateVolumes();
-
-</script>
-
-</body>
-  </html>
+        editedBlob =
+          new B
