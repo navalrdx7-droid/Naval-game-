@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>NAVAL AI VIDEO EDITOR V5</title>
+<title>NAVAL AI VIDEO EDITOR V6</title>
 
 <style>
 *{
@@ -91,8 +91,8 @@ button:disabled{
 
 .smart{
   background:#8b4dff;
-  color:#fff;
-  font-size:20px;
+  color:white;
+  font-size:19px;
 }
 
 .aiTest{
@@ -105,7 +105,7 @@ button:disabled{
 
 .red{
   background:#e53935;
-  color:#fff;
+  color:white;
 }
 
 .row{
@@ -159,6 +159,7 @@ canvas{
   width:0%;
   height:100%;
   background:#08cbea;
+  transition:.2s;
 }
 
 .badge{
@@ -194,13 +195,12 @@ canvas{
 <body>
 
 <header>
-<h1>🧠 NAVAL AI VIDEO EDITOR V5</h1>
+<h1>🧠 NAVAL AI VIDEO EDITOR V6</h1>
 <p>Smart Automatic Editing Studio</p>
 </header>
 
 <div class="container">
 
-<!-- VIDEO -->
 <div class="card">
 
 <label>🎥 Select Video</label>
@@ -218,16 +218,13 @@ canvas{
   preload="metadata">
 </video>
 
-<div
-  class="badge"
-  id="videoInfo">
-  No video selected
+<div class="badge" id="videoInfo">
+No video selected
 </div>
 
 </div>
 
 
-<!-- FORMAT -->
 <div class="card">
 
 <label>📱 Output Format</label>
@@ -251,7 +248,6 @@ canvas{
 </div>
 
 
-<!-- MUSIC -->
 <div class="card">
 
 <label>🎵 Background Music</label>
@@ -264,22 +260,18 @@ canvas{
 
 <audio
   id="music"
-  controls>
+  controls
+  preload="metadata">
 </audio>
 
 </div>
 
 
-<!-- VOLUME -->
 <div class="card">
 
 <label>
 🔊 Original Video
-<span
-  class="value"
-  id="videoVolumeValue">
-  100%
-</span>
+<span class="value" id="videoVolumeValue">100%</span>
 </label>
 
 <input
@@ -292,11 +284,7 @@ canvas{
 
 <label>
 🎵 Background Music
-<span
-  class="value"
-  id="musicVolumeValue">
-  30%
-</span>
+<span class="value" id="musicVolumeValue">30%</span>
 </label>
 
 <input
@@ -310,7 +298,6 @@ canvas{
 </div>
 
 
-<!-- TRIM -->
 <div class="card">
 
 <label>✂️ Start Time</label>
@@ -335,20 +322,15 @@ canvas{
 
 <div class="row">
 
-<button onclick="setStart()">
-SET START
-</button>
+<button onclick="setStart()">SET START</button>
 
-<button onclick="setEnd()">
-SET END
-</button>
+<button onclick="setEnd()">SET END</button>
 
 </div>
 
 </div>
 
 
-<!-- TEXT -->
 <div class="card">
 
 <label>📝 Caption / Text</label>
@@ -362,16 +344,13 @@ SET END
 </div>
 
 
-<!-- FILTER -->
 <div class="card">
 
 <label>🎨 Editing Style</label>
 
 <select id="filter">
 
-<option value="none">
-Normal
-</option>
+<option value="none">Normal</option>
 
 <option value="contrast(1.35) saturate(1.4)">
 🔥 Gaming Cinematic
@@ -398,31 +377,34 @@ Normal
 </div>
 
 
-<!-- AI -->
 <div class="card">
 
 <button
   class="smart"
   id="smartButton"
   onclick="smartAIEdit()">
+
 🧠 SMART AI EDIT
+
 </button>
 
 <button
   class="aiTest"
-  id="aiTestButton"
   onclick="testAIBackend()">
+
 🧪 TEST AI BACKEND
+
 </button>
 
 <div class="info">
 
-Smart AI:
-<br>• Smart scene selection
+Smart mode automatically chooses:
+
+<br>• Best short section
 <br>• Shorts/Reels format
 <br>• Cinematic filter
-<br>• Automatic caption
-<br>• Smart audio settings
+<br>• Caption
+<br>• Audio settings
 
 </div>
 
@@ -431,7 +413,6 @@ Smart AI:
 </div>
 
 
-<!-- ACTIONS -->
 <div class="card">
 
 <button onclick="previewEdit()">
@@ -446,24 +427,25 @@ Smart AI:
   class="green"
   id="downloadButton"
   onclick="downloadEditedVideo()">
+
 ⬇️ DOWNLOAD VIDEO
+
 </button>
 
 <button
   class="red"
   onclick="resetEditor()">
+
 🔄 RESET
+
 </button>
 
 </div>
 
 
-<!-- STATUS -->
 <div class="card">
 
-<div
-  class="status"
-  id="status">
+<div class="status" id="status">
 Video select करो
 </div>
 
@@ -484,6 +466,8 @@ Video select करो
 
 
 <script>
+
+"use strict";
 
 /* =========================
    ELEMENTS
@@ -509,9 +493,6 @@ document.getElementById("progressBar");
 
 const smartButton =
 document.getElementById("smartButton");
-
-const aiTestButton =
-document.getElementById("aiTestButton");
 
 const downloadButton =
 document.getElementById("downloadButton");
@@ -552,11 +533,10 @@ function setStatus(text){
 
 function setProgress(value){
 
-  value =
-    Math.max(
-      0,
-      Math.min(100,value)
-    );
+  value = Math.max(
+    0,
+    Math.min(100,value)
+  );
 
   progressBar.style.width =
     value + "%";
@@ -636,9 +616,18 @@ document
     if(!file)
       return;
 
+    if(
+      !file.type.startsWith("video/")
+    ){
+
+      setStatus(
+        "❌ Please video file select करो"
+      );
+
+      return;
+    }
 
     videoFileSelected = true;
-
 
     if(videoURL){
 
@@ -648,22 +637,23 @@ document
 
     }
 
-
     videoURL =
       URL.createObjectURL(file);
 
+    video.pause();
 
-    /*
-      IMPORTANT:
-      Video gets its own
-      object URL.
-    */
+    video.removeAttribute("src");
+
+    video.load();
 
     video.src =
       videoURL;
 
     video.load();
 
+    setStatus(
+      "⏳ Video loading..."
+    );
 
     video.onloadedmetadata =
       function(){
@@ -671,18 +661,14 @@ document
         const duration =
           video.duration;
 
-
         document.getElementById(
           "start"
-        ).value =
-          "0";
-
+        ).value = "0";
 
         document.getElementById(
           "end"
         ).value =
           duration.toFixed(1);
-
 
         document.getElementById(
           "videoInfo"
@@ -691,32 +677,37 @@ document
           Math.round(duration) +
           " sec video";
 
-
         setStatus(
-          "✅ Video ready — PLAY दबाओ"
+          "✅ Video ready — ▶️ दबाओ"
         );
-
 
         setProgress(0);
 
-
-        /*
-          Make sure playback
-          volume is normal.
-        */
-
         updateVolumes();
-
       };
 
+    video.onloadeddata =
+      function(){
+
+        setStatus(
+          "✅ Video loaded"
+        );
+
+      };
 
     video.onerror =
       function(){
 
+        videoFileSelected = false;
+
         setStatus(
-          "❌ Video load नहीं हो पाया"
+          "❌ Video format browser में supported नहीं है"
         );
 
+        document.getElementById(
+          "videoInfo"
+        ).innerText =
+          "Video load failed";
       };
 
   }
@@ -739,9 +730,18 @@ document
     if(!file)
       return;
 
+    if(
+      !file.type.startsWith("audio/")
+    ){
+
+      setStatus(
+        "❌ Please audio file select करो"
+      );
+
+      return;
+    }
 
     musicFileSelected = true;
-
 
     if(musicURL){
 
@@ -751,32 +751,46 @@ document
 
     }
 
-
     musicURL =
       URL.createObjectURL(file);
 
+    music.pause();
+
+    music.removeAttribute("src");
+
+    music.load();
 
     music.src =
       musicURL;
 
     music.load();
 
-    music.loop = true;
+    music.onloadedmetadata =
+      function(){
 
+        setStatus(
+          "🎵 Audio ready — ▶️ दबाओ"
+        );
 
-    setStatus(
-      "🎵 Music ready"
-    );
+      };
 
+    music.onerror =
+      function(){
 
-    updateVolumes();
+        musicFileSelected = false;
+
+        setStatus(
+          "❌ Audio format supported नहीं है"
+        );
+
+      };
 
   }
 );
 
 
 /* =========================
-   SET START
+   START
 ========================= */
 
 function setStart(){
@@ -790,12 +804,10 @@ function setStart(){
     return;
   }
 
-
   document.getElementById(
     "start"
   ).value =
     video.currentTime.toFixed(1);
-
 
   setStatus(
     "✂️ Start time set"
@@ -804,7 +816,7 @@ function setStart(){
 
 
 /* =========================
-   SET END
+   END
 ========================= */
 
 function setEnd(){
@@ -818,16 +830,119 @@ function setEnd(){
     return;
   }
 
-
   document.getElementById(
     "end"
   ).value =
     video.currentTime.toFixed(1);
 
-
   setStatus(
     "✂️ End time set"
   );
+}
+
+
+/* =========================
+   PREVIEW
+========================= */
+
+async function previewEdit(){
+
+  if(!videoFileSelected){
+
+    alert(
+      "पहले video select करो"
+    );
+
+    return;
+  }
+
+  const start =
+    Number(
+      document.getElementById(
+        "start"
+      ).value
+    );
+
+  const end =
+    Number(
+      document.getElementById(
+        "end"
+      ).value
+    );
+
+  if(
+    !Number.isFinite(start) ||
+    !Number.isFinite(end) ||
+    end <= start
+  ){
+
+    alert(
+      "Start और End time सही करो"
+    );
+
+    return;
+  }
+
+  try{
+
+    video.pause();
+
+    video.currentTime =
+      start;
+
+    if(musicFileSelected){
+
+      music.pause();
+
+      music.currentTime = 0;
+
+    }
+
+    await video.play();
+
+    if(musicFileSelected){
+
+      music.play().catch(
+        function(){}
+      );
+
+    }
+
+    setStatus(
+      "▶️ Preview चल रहा है..."
+    );
+
+    video.ontimeupdate =
+      function(){
+
+        if(
+          video.currentTime >= end
+        ){
+
+          video.pause();
+
+          if(musicFileSelected)
+            music.pause();
+
+          video.ontimeupdate = null;
+
+          setStatus(
+            "✅ Preview finished"
+          );
+
+        }
+
+      };
+
+  }catch(error){
+
+    console.error(error);
+
+    setStatus(
+      "❌ Video play नहीं हुआ"
+    );
+
+  }
 }
 
 
@@ -853,14 +968,11 @@ function drawFrame(){
   if(!video.videoWidth)
     return;
 
-
   const format =
     getFormat();
 
-
   let cw;
   let ch;
-
 
   if(format === "vertical"){
 
@@ -879,14 +991,10 @@ function drawFrame(){
 
   }
 
-
   canvas.width = cw;
   canvas.height = ch;
 
-
-  ctx.fillStyle =
-    "#000";
-
+  ctx.fillStyle = "#000";
 
   ctx.fillRect(
     0,
@@ -895,13 +1003,11 @@ function drawFrame(){
     ch
   );
 
-
   const scale =
     Math.max(
       cw / video.videoWidth,
       ch / video.videoHeight
     );
-
 
   const nw =
     video.videoWidth * scale;
@@ -909,19 +1015,16 @@ function drawFrame(){
   const nh =
     video.videoHeight * scale;
 
-
   const x =
     (cw - nw) / 2;
 
   const y =
     (ch - nh) / 2;
 
-
   ctx.filter =
     document.getElementById(
       "filter"
     ).value;
-
 
   ctx.drawImage(
     video,
@@ -931,16 +1034,12 @@ function drawFrame(){
     nh
   );
 
-
-  ctx.filter =
-    "none";
-
+  ctx.filter = "none";
 
   const text =
     document.getElementById(
       "videoText"
     ).value.trim();
-
 
   if(text){
 
@@ -952,33 +1051,25 @@ function drawFrame(){
       ) +
       "px Arial";
 
-
     ctx.textAlign =
       "center";
-
 
     ctx.textBaseline =
       "bottom";
 
-
-    ctx.lineWidth =
-      6;
-
+    ctx.lineWidth = 6;
 
     ctx.strokeStyle =
       "black";
 
-
     ctx.fillStyle =
       "white";
-
 
     ctx.strokeText(
       text,
       cw / 2,
       ch - 70
     );
-
 
     ctx.fillText(
       text,
@@ -987,133 +1078,6 @@ function drawFrame(){
     );
 
   }
-
-}
-
-
-/* =========================
-   PREVIEW
-========================= */
-
-async function previewEdit(){
-
-  if(!videoFileSelected){
-
-    alert(
-      "पहले video select करो"
-    );
-
-    return;
-  }
-
-
-  const start =
-    Number(
-      document.getElementById(
-        "start"
-      ).value
-    );
-
-
-  const end =
-    Number(
-      document.getElementById(
-        "end"
-      ).value
-    );
-
-
-  if(end <= start){
-
-    alert(
-      "End time सही करो"
-    );
-
-    return;
-  }
-
-
-  /*
-    Normal browser playback.
-    No AudioContext here.
-  */
-
-  video.pause();
-
-  video.currentTime =
-    start;
-
-
-  if(musicFileSelected){
-
-    music.pause();
-
-    music.currentTime =
-      0;
-
-  }
-
-
-  setStatus(
-    "▶️ Preview तैयार..."
-  );
-
-
-  try{
-
-    await video.play();
-
-
-    if(musicFileSelected){
-
-      music.play().catch(
-        ()=>{}
-      );
-
-    }
-
-
-    setStatus(
-      "▶️ Preview चल रहा है..."
-    );
-
-
-  }catch(error){
-
-    console.error(error);
-
-    setStatus(
-      "❌ Browser ने video play नहीं किया"
-    );
-
-    return;
-
-  }
-
-
-  video.ontimeupdate =
-    function(){
-
-      if(
-        video.currentTime >= end
-      ){
-
-        video.pause();
-
-        if(musicFileSelected)
-          music.pause();
-
-        video.ontimeupdate =
-          null;
-
-        setStatus(
-          "✅ Preview finished"
-        );
-
-      }
-
-    };
-
 }
 
 
@@ -1132,18 +1096,15 @@ async function smartAIEdit(){
     return;
   }
 
-
   if(exporting)
     return;
-
 
   const duration =
     video.duration;
 
-
   if(
     !duration ||
-    duration <= 0
+    !Number.isFinite(duration)
   ){
 
     alert(
@@ -1153,26 +1114,16 @@ async function smartAIEdit(){
     return;
   }
 
-
-  smartButton.disabled =
-    true;
-
+  smartButton.disabled = true;
 
   setStatus(
     "🧠 Video analyze हो रहा है..."
   );
 
-
-  setProgress(5);
-
+  setProgress(10);
 
   let start = 0;
   let end = duration;
-
-
-  /*
-    Smart section
-  */
 
   if(duration <= 15){
 
@@ -1203,139 +1154,68 @@ async function smartAIEdit(){
 
   }
 
-
   document.getElementById(
     "start"
   ).value =
     start.toFixed(1);
-
 
   document.getElementById(
     "end"
   ).value =
     end.toFixed(1);
 
-
   document.getElementById(
     "format"
   ).value =
     "vertical";
-
 
   document.getElementById(
     "videoText"
   ).value =
     "NAVAL GAMING 🔥";
 
-
   document.getElementById(
     "filter"
   ).value =
     "contrast(1.35) saturate(1.4)";
 
-
   document.getElementById(
     "videoVolume"
-  ).value =
-    80;
-
+  ).value = 80;
 
   document.getElementById(
     "musicVolume"
   ).value =
-    musicFileSelected
-      ? 25
-      : 0;
-
+    musicFileSelected ? 25 : 0;
 
   updateVolumes();
 
-
-  setProgress(20);
-
-
-  setStatus(
-    "🧠 Smart settings तैयार..."
-  );
-
-
-  /*
-    Optional Vercel AI request.
-    Failure won't stop local editor.
-  */
-
-  try{
-
-    const response =
-      await fetch(
-        "/api/ai",
-        {
-          method:"POST",
-
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
-
-          body:JSON.stringify({
-
-            duration:duration,
-
-            format:"vertical",
-
-            text:
-              "NAVAL GAMING 🔥"
-
-          })
-
-        }
-      );
-
-
-    if(response.ok){
-
-      const data =
-        await response.json();
-
-      if(data.success){
-
-        setStatus(
-          "🧠 AI analysis complete"
-        );
-
-      }
-
-    }
-
-  }catch(error){
-
-    console.log(
-      "Local Smart AI mode"
-    );
-
-  }
-
-
   setProgress(30);
 
+  setStatus(
+    "🎬 Smart settings तैयार..."
+  );
 
   await new Promise(
-    resolve =>
+    function(resolve){
+
       setTimeout(
         resolve,
-        500
-      )
+        600
+      );
+
+    }
   );
 
+  setProgress(40);
 
-  await createEditedVideo(
-    true
+  setStatus(
+    "🤖 Smart Edit शुरू..."
   );
 
+  await createEditedVideo(true);
 
-  smartButton.disabled =
-    false;
-
+  smartButton.disabled = false;
 }
 
 
@@ -1356,40 +1236,8 @@ async function createEditedVideo(
     return;
   }
 
-
   if(exporting)
     return;
-
-
-  const start =
-    Number(
-      document.getElementById(
-        "start"
-      ).value
-    );
-
-
-  const end =
-    Number(
-      document.getElementById(
-        "end"
-      ).value
-    );
-
-
-  if(end <= start){
-
-    alert(
-      "End time सही करो"
-    );
-
-    return;
-  }
-
-
-  /*
-    Browser support check
-  */
 
   if(
     !canvas.captureStream ||
@@ -1403,15 +1251,38 @@ async function createEditedVideo(
     return;
   }
 
+  const start =
+    Number(
+      document.getElementById(
+        "start"
+      ).value
+    );
+
+  const end =
+    Number(
+      document.getElementById(
+        "end"
+      ).value
+    );
+
+  if(
+    !Number.isFinite(start) ||
+    !Number.isFinite(end) ||
+    end <= start
+  ){
+
+    alert(
+      "Start और End time सही करो"
+    );
+
+    return;
+  }
 
   exporting = true;
 
-  smartButton.disabled =
-    true;
+  smartButton.disabled = true;
 
-  downloadButton.disabled =
-    true;
-
+  downloadButton.disabled = true;
 
   try{
 
@@ -1421,43 +1292,20 @@ async function createEditedVideo(
       : "🎬 Video export..."
     );
 
-
-    setProgress(25);
-
-
-    /*
-      Prepare canvas
-    */
+    setProgress(45);
 
     drawFrame();
-
 
     const canvasStream =
       canvas.captureStream(30);
 
-
-    /*
-      IMPORTANT:
-      No createMediaElementSource.
-      Original playback remains normal.
-    */
-
-    let stream =
-      canvasStream;
-
-
-    /*
-      Video-only export is the
-      safest mobile mode.
-    */
-
     let mime =
       "video/webm;codecs=vp9";
 
-
     if(
-      !MediaRecorder
-      .isTypeSupported(mime)
+      !MediaRecorder.isTypeSupported(
+        mime
+      )
     ){
 
       mime =
@@ -1465,10 +1313,10 @@ async function createEditedVideo(
 
     }
 
-
     if(
-      !MediaRecorder
-      .isTypeSupported(mime)
+      !MediaRecorder.isTypeSupported(
+        mime
+      )
     ){
 
       mime =
@@ -1476,18 +1324,15 @@ async function createEditedVideo(
 
     }
 
-
     const recorder =
       new MediaRecorder(
-        stream,
+        canvasStream,
         {
           mimeType:mime
         }
       );
 
-
     const chunks = [];
-
 
     recorder.ondataavailable =
       function(event){
@@ -1505,7 +1350,6 @@ async function createEditedVideo(
 
       };
 
-
     recorder.onstop =
       function(){
 
@@ -1518,7 +1362,6 @@ async function createEditedVideo(
             }
           );
 
-
         if(editedURL){
 
           URL.revokeObjectURL(
@@ -1527,12 +1370,10 @@ async function createEditedVideo(
 
         }
 
-
         editedURL =
           URL.createObjectURL(
             editedBlob
           );
-
 
         exporting = false;
 
@@ -1542,9 +1383,7 @@ async function createEditedVideo(
         downloadButton.disabled =
           false;
 
-
         setProgress(100);
-
 
         setStatus(
           "✅ Edited video तैयार है!"
@@ -1552,23 +1391,13 @@ async function createEditedVideo(
 
       };
 
-
-    /*
-      Stop current playback
-    */
-
     video.pause();
-
-    if(musicFileSelected)
-      music.pause();
-
 
     video.currentTime =
       start;
 
-
     await new Promise(
-      resolve => {
+      function(resolve){
 
         const handler =
           function(){
@@ -1582,7 +1411,6 @@ async function createEditedVideo(
 
           };
 
-
         video.addEventListener(
           "seeked",
           handler
@@ -1591,12 +1419,19 @@ async function createEditedVideo(
       }
     );
 
-
     recorder.start(200);
-
 
     await video.play();
 
+    if(musicFileSelected){
+
+      music.currentTime = 0;
+
+      music.play().catch(
+        function(){}
+      );
+
+    }
 
     function render(){
 
@@ -1609,25 +1444,20 @@ async function createEditedVideo(
 
       }
 
-
       drawFrame();
-
 
       const elapsed =
         video.currentTime -
         start;
 
-
       const total =
         end - start;
 
-
       const percent =
-        30 +
+        45 +
         (
           elapsed / total
-        ) * 65;
-
+        ) * 50;
 
       setProgress(
         Math.min(
@@ -1636,7 +1466,6 @@ async function createEditedVideo(
         )
       );
 
-
       animationID =
         requestAnimationFrame(
           render
@@ -1644,9 +1473,7 @@ async function createEditedVideo(
 
     }
 
-
     render();
-
 
     video.ontimeupdate =
       function(){
@@ -1657,18 +1484,16 @@ async function createEditedVideo(
 
           video.pause();
 
+          if(musicFileSelected)
+            music.pause();
 
           cancelAnimationFrame(
             animationID
           );
 
-
-          video.ontimeupdate =
-            null;
-
+          video.ontimeupdate = null;
 
           drawFrame();
-
 
           recorder.stop();
 
@@ -1676,14 +1501,11 @@ async function createEditedVideo(
 
       };
 
-
   }catch(error){
 
     console.error(error);
 
-
     exporting = false;
-
 
     smartButton.disabled =
       false;
@@ -1691,31 +1513,51 @@ async function createEditedVideo(
     downloadButton.disabled =
       false;
 
-
     setProgress(0);
-
 
     setStatus(
       "❌ Export failed"
     );
-
 
     alert(
       "Video export नहीं हो पाया."
     );
 
   }
-
 }
 
 
 /* =========================
-   DOWNLOAD
+   AI BACKEND TEST
 ========================= */
 
-function downloadEditedVideo(){
+async function testAIBackend(){
 
-  if(!editedBlob){
+  const result =
+    aiResult;
 
-    alert(
-      "पहले CREATE EDITED V
+  result.style.display =
+    "block";
+
+  result.innerText =
+    "🧪 AI backend test हो रहा है...";
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/ai",
+        {
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:JSON.stringify({
+            test:true,
+            message:
+              "NAVAL AI VIDEO EDITOR"
+          })
+     
