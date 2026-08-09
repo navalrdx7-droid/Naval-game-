@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>NAVAL AI VIDEO EDITOR V2</title>
+<title>NAVAL AI VIDEO EDITOR V3</title>
 
 <style>
 
@@ -16,7 +16,7 @@
 body{
   margin:0;
   background:#080808;
-  color:white;
+  color:#fff;
   font-family:Arial,sans-serif;
 }
 
@@ -29,7 +29,7 @@ header{
 
 header h1{
   margin:0;
-  font-size:24px;
+  font-size:25px;
 }
 
 header p{
@@ -94,10 +94,10 @@ button:disabled{
   opacity:.5;
 }
 
-.auto{
+.smart{
   background:#8b4dff;
   color:white;
-  font-size:19px;
+  font-size:20px;
 }
 
 .green{
@@ -173,6 +173,15 @@ canvas{
   font-size:13px;
 }
 
+.smartInfo{
+  margin-top:10px;
+  padding:12px;
+  background:#101010;
+  border-radius:12px;
+  color:#aaa;
+  line-height:1.5;
+}
+
 </style>
 </head>
 
@@ -180,9 +189,9 @@ canvas{
 
 <header>
 
-<h1>🎬 NAVAL AI VIDEO EDITOR V2</h1>
+<h1>🧠 NAVAL AI VIDEO EDITOR V3</h1>
 
-<p>🤖 Smart Shorts & Reels Editor</p>
+<p>Smart Automatic Editing Studio</p>
 
 </header>
 
@@ -222,7 +231,7 @@ No video selected
 
 <div class="card">
 
-<label>📱 Export Format</label>
+<label>📱 Output Format</label>
 
 <select id="format">
 
@@ -231,7 +240,7 @@ No video selected
 </option>
 
 <option value="landscape">
-🖥️ Landscape — 16:9
+🖥️ YouTube — 16:9
 </option>
 
 <option value="square">
@@ -263,13 +272,13 @@ controls>
 </div>
 
 
-<!-- VOLUME -->
+<!-- AUDIO -->
 
 <div class="card">
 
 <label>
 
-🔊 Original Sound
+🔊 Original Video
 
 <span
 class="value"
@@ -289,7 +298,7 @@ value="100"
 
 <label>
 
-🎵 Music
+🎵 Background Music
 
 <span
 class="value"
@@ -364,11 +373,11 @@ placeholder="NAVAL GAMING 🔥"
 </div>
 
 
-<!-- FILTER -->
+<!-- STYLE -->
 
 <div class="card">
 
-<label>🎨 Style</label>
+<label>🎨 Editing Style</label>
 
 <select id="filter">
 
@@ -405,7 +414,7 @@ Normal
 
 <div class="card">
 
-<label>✨ Effects</label>
+<label>✨ Automatic Effect</label>
 
 <select id="effect">
 
@@ -422,22 +431,23 @@ Fade In + Fade Out
 </div>
 
 
-<!-- AUTO EDIT -->
+<!-- SMART AI -->
 
 <div class="card">
 
 <button
-class="auto"
-id="autoButton"
-onclick="autoEdit()">
+class="smart"
+id="smartButton"
+onclick="smartAIEdit()">
 
-🤖 AUTO EDIT V2
+🧠 SMART AI EDIT
 
 </button>
 
-<div class="badge">
+<div class="smartInfo">
 
-One-click Shorts/Reels editing
+Smart mode automatically chooses an editing section,
+Shorts/Reels format, cinematic style, text and audio settings.
 
 </div>
 
@@ -453,7 +463,7 @@ One-click Shorts/Reels editing
 </button>
 
 <button onclick="createEditedVideo()">
-🎬 CREATE VIDEO
+🎬 CREATE EDITED VIDEO
 </button>
 
 <button
@@ -508,28 +518,29 @@ id="progressBar">
 
 <script>
 
-const video =
+
+const video=
 document.getElementById("video");
 
-const music =
+const music=
 document.getElementById("music");
 
-const canvas =
+const canvas=
 document.getElementById("canvas");
 
-const ctx =
+const ctx=
 canvas.getContext("2d");
 
-const statusText =
+const statusText=
 document.getElementById("status");
 
-const progressBar =
+const progressBar=
 document.getElementById("progressBar");
 
-const autoButton =
-document.getElementById("autoButton");
+const smartButton=
+document.getElementById("smartButton");
 
-const downloadButton =
+const downloadButton=
 document.getElementById("downloadButton");
 
 
@@ -614,14 +625,14 @@ function setupAudio(){
 
 function updateVolumes(){
 
-  const vv=
+  const videoVolume=
     Number(
       document.getElementById(
         "videoVolume"
       ).value
     )/100;
 
-  const mv=
+  const musicVolume=
     Number(
       document.getElementById(
         "musicVolume"
@@ -631,15 +642,22 @@ function updateVolumes(){
   document.getElementById(
     "videoVolumeValue"
   ).innerText=
-    Math.round(vv*100)+"%";
+    Math.round(
+      videoVolume*100
+    )+"%";
 
   document.getElementById(
     "musicVolumeValue"
   ).innerText=
-    Math.round(mv*100)+"%";
+    Math.round(
+      musicVolume*100
+    )+"%";
 
-  video.volume=vv;
-  music.volume=mv;
+  video.volume=
+    videoVolume;
+
+  music.volume=
+    musicVolume;
 
 }
 
@@ -651,6 +669,7 @@ document
   updateVolumes
 );
 
+
 document
 .getElementById("musicVolume")
 .addEventListener(
@@ -659,7 +678,7 @@ document
 );
 
 
-/* VIDEO SELECT */
+/* VIDEO */
 
 document
 .getElementById("videoFile")
@@ -667,17 +686,24 @@ document
   "change",
   function(){
 
-    const file=this.files[0];
+    const file=
+      this.files[0];
 
     if(!file)
       return;
 
     videoFileSelected=true;
 
+    if(videoURL)
+      URL.revokeObjectURL(
+        videoURL
+      );
+
     videoURL=
       URL.createObjectURL(file);
 
-    video.src=videoURL;
+    video.src=
+      videoURL;
 
     video.onloadedmetadata=
       function(){
@@ -695,7 +721,9 @@ document
           "videoInfo"
         ).innerText=
           "🎥 "+
-          Math.round(video.duration)+
+          Math.round(
+            video.duration
+          )+
           " sec video";
 
         setStatus(
@@ -718,17 +746,24 @@ document
   "change",
   function(){
 
-    const file=this.files[0];
+    const file=
+      this.files[0];
 
     if(!file)
       return;
 
     musicFileSelected=true;
 
+    if(musicURL)
+      URL.revokeObjectURL(
+        musicURL
+      );
+
     musicURL=
       URL.createObjectURL(file);
 
-    music.src=musicURL;
+    music.src=
+      musicURL;
 
     music.loop=true;
 
@@ -801,7 +836,7 @@ function getFormat(){
 }
 
 
-/* DRAW */
+/* DRAW FRAME */
 
 function drawFrame(){
 
@@ -822,16 +857,12 @@ function drawFrame(){
     cw=720;
     ch=1280;
 
-  }
-
-  else if(format==="square"){
+  }else if(format==="square"){
 
     cw=1080;
     ch=1080;
 
-  }
-
-  else{
+  }else{
 
     cw=1280;
     ch=720;
@@ -842,18 +873,6 @@ function drawFrame(){
   canvas.width=cw;
   canvas.height=ch;
 
-
-  ctx.clearRect(
-    0,
-    0,
-    cw,
-    ch
-  );
-
-
-  /*
-    BACKGROUND
-  */
 
   ctx.fillStyle="#000";
 
@@ -934,9 +953,11 @@ function drawFrame(){
 
     ctx.lineWidth=6;
 
-    ctx.strokeStyle="black";
+    ctx.strokeStyle=
+      "black";
 
-    ctx.fillStyle="white";
+    ctx.fillStyle=
+      "white";
 
 
     ctx.strokeText(
@@ -997,7 +1018,8 @@ async function previewEdit(){
   }
 
 
-  video.currentTime=start;
+  video.currentTime=
+    start;
 
 
   if(musicFileSelected){
@@ -1052,9 +1074,11 @@ async function previewEdit(){
 }
 
 
-/* AUTO EDIT */
+/* =========================
+   SMART AI EDIT
+========================= */
 
-async function autoEdit(){
+async function smartAIEdit(){
 
   if(!videoFileSelected){
 
@@ -1080,37 +1104,89 @@ async function autoEdit(){
   ){
 
     alert(
-      "Video load होने दो"
+      "Video पूरी तरह load होने दो"
     );
 
     return;
   }
 
 
+  smartButton.disabled=true;
+
+
+  setStatus(
+    "🧠 Video analyze हो रहा है..."
+  );
+
+
+  setProgress(5);
+
+
   /*
-    SMART SHORT LENGTH
+    SMART SEGMENT SELECTION
+
+    अभी browser-based heuristic है।
   */
 
-  const length=
-    Math.min(
-      duration,
-      20
-    );
+
+  let start=0;
+  let end=duration;
+
+
+  if(duration<=15){
+
+    start=0;
+    end=duration;
+
+  }else if(duration<=40){
+
+    start=
+      Math.max(
+        0,
+        duration*.10
+      );
+
+    end=
+      Math.min(
+        duration,
+        start+20
+      );
+
+  }else{
+
+    /*
+      Middle highlight
+    */
+
+    start=
+      Math.max(
+        0,
+        duration*.25
+      );
+
+    end=
+      Math.min(
+        duration,
+        start+20
+      );
+
+  }
 
 
   document.getElementById(
     "start"
-  ).value=0;
+  ).value=
+    start.toFixed(1);
 
 
   document.getElementById(
     "end"
   ).value=
-    length.toFixed(1);
+    end.toFixed(1);
 
 
   /*
-    AUTO SHORTS MODE
+    SMART FORMAT
   */
 
   document.getElementById(
@@ -1120,7 +1196,7 @@ async function autoEdit(){
 
 
   /*
-    AUTO CAPTION
+    SMART TEXT
   */
 
   document.getElementById(
@@ -1130,7 +1206,7 @@ async function autoEdit(){
 
 
   /*
-    CINEMATIC
+    SMART STYLE
   */
 
   document.getElementById(
@@ -1140,7 +1216,7 @@ async function autoEdit(){
 
 
   /*
-    EFFECT
+    SMART EFFECT
   */
 
   document.getElementById(
@@ -1150,7 +1226,7 @@ async function autoEdit(){
 
 
   /*
-    AUDIO
+    SMART AUDIO
   */
 
   document.getElementById(
@@ -1159,37 +1235,54 @@ async function autoEdit(){
 
   document.getElementById(
     "musicVolume"
-  ).value=30;
+  ).value=
+    musicFileSelected
+    ? 25
+    : 0;
 
 
   updateVolumes();
 
 
-  setProgress(10);
+  setProgress(15);
 
 
   setStatus(
-    "🤖 Auto Edit V2 तैयार हो रहा है..."
+    "🧠 Smart decisions तैयार..."
   );
 
 
   /*
-    AUTOMATIC EXPORT
+    SMALL DELAY
+    ताकि UI update दिखे
   */
 
-  setTimeout(
-    function(){
-
-      createEditedVideo(true);
-
-    },
-    600
+  await new Promise(
+    resolve=>
+      setTimeout(
+        resolve,
+        700
+      )
   );
+
+
+  setProgress(25);
+
+
+  setStatus(
+    "🎬 Smart Auto Edit शुरू..."
+  );
+
+
+  await createEditedVideo(true);
+
+
+  smartButton.disabled=false;
 
 }
 
 
-/* CREATE */
+/* CREATE VIDEO */
 
 async function createEditedVideo(
   automatic=false
@@ -1237,7 +1330,8 @@ async function createEditedVideo(
 
   exporting=true;
 
-  autoButton.disabled=true;
+
+  smartButton.disabled=true;
 
   downloadButton.disabled=true;
 
@@ -1249,7 +1343,8 @@ async function createEditedVideo(
 
 
     if(
-      audioContext.state==="suspended"
+      audioContext.state===
+      "suspended"
     ){
 
       await audioContext.resume();
@@ -1259,12 +1354,12 @@ async function createEditedVideo(
 
     setStatus(
       automatic
-      ? "🤖 AI Auto Edit export हो रहा है..."
-      : "🎬 Video export हो रहा है..."
+      ? "🧠 Smart AI editing..."
+      : "🎬 Video export..."
     );
 
 
-    setProgress(15);
+    setProgress(30);
 
 
     /*
@@ -1279,7 +1374,7 @@ async function createEditedVideo(
 
 
     /*
-      AUDIO MIX
+      AUDIO
     */
 
     const destination=
@@ -1329,7 +1424,7 @@ async function createEditedVideo(
 
 
     /*
-      STREAM
+      COMBINED STREAM
     */
 
     const combinedStream=
@@ -1340,7 +1435,9 @@ async function createEditedVideo(
       .getVideoTracks()
       .forEach(
         track=>
-          combinedStream.addTrack(track)
+          combinedStream.addTrack(
+            track
+          )
       );
 
 
@@ -1349,7 +1446,9 @@ async function createEditedVideo(
       .getAudioTracks()
       .forEach(
         track=>
-          combinedStream.addTrack(track)
+          combinedStream.addTrack(
+            track
+          )
       );
 
 
@@ -1377,7 +1476,8 @@ async function createEditedVideo(
       .isTypeSupported(mime)
     ){
 
-      mime="video/webm";
+      mime=
+        "video/webm";
 
     }
 
@@ -1446,7 +1546,8 @@ async function createEditedVideo(
 
         exporting=false;
 
-        autoButton.disabled=false;
+
+        smartButton.disabled=false;
 
         downloadButton.disabled=false;
 
@@ -1455,7 +1556,7 @@ async function createEditedVideo(
 
 
         setStatus(
-          "✅ Video तैयार है! DOWNLOAD दबाओ."
+          "✅ Smart Edit तैयार है! DOWNLOAD दबाओ."
         );
 
       };
@@ -1471,7 +1572,8 @@ async function createEditedVideo(
       music.pause();
 
 
-    video.currentTime=start;
+    video.currentTime=
+      start;
 
 
     await new Promise(
@@ -1500,7 +1602,7 @@ async function createEditedVideo(
 
 
     /*
-      RECORD
+      START RECORD
     */
 
     recorder.start(200);
@@ -1523,7 +1625,7 @@ async function createEditedVideo(
 
 
     /*
-      RENDER
+      RENDER LOOP
     */
 
     function render(){
@@ -1547,8 +1649,10 @@ async function createEditedVideo(
 
 
       const percent=
-        20+
-        (elapsed/total)*75;
+        30+
+        (
+          elapsed/total
+        )*65;
 
 
       setProgress(
@@ -1613,18 +1717,22 @@ async function createEditedVideo(
 
     exporting=false;
 
-    autoButton.disabled=false;
+
+    smartButton.disabled=false;
 
     downloadButton.disabled=false;
 
+
     setProgress(0);
 
+
     setStatus(
-      "❌ Export failed"
+      "❌ Smart Edit failed"
     );
 
+
     alert(
-      "Browser इस video/audio format को export नहीं कर पाया."
+      "Browser इस format को export नहीं कर पाया."
     );
 
   }
@@ -1639,7 +1747,7 @@ function downloadEditedVideo(){
   if(!editedBlob){
 
     alert(
-      "पहले video create करो"
+      "पहले Smart Edit करो"
     );
 
     return;
@@ -1647,14 +1755,17 @@ function downloadEditedVideo(){
 
 
   const link=
-    document.createElement("a");
+    document.createElement(
+      "a"
+    );
 
 
-  link.href=editedURL;
+  link.href=
+    editedURL;
 
 
   link.download=
-    "NAVAL_AI_SHORT_EDIT.webm";
+    "NAVAL_SMART_AI_EDIT.webm";
 
 
   document.body.appendChild(
@@ -1693,4 +1804,4 @@ updateVolumes();
 </script>
 
 </body>
-                         </html>
+  </html>
