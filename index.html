@@ -2,366 +2,1135 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NAVAL AI VIDEO EDITOR</title>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#0d0d0d;color:#fff;font-family:Arial,sans-serif}
-header{text-align:center;padding:20px;background:#171717;border-bottom:1px solid #333}
-h1{margin:0;font-size:25px} header p{color:#aaa;margin:7px 0 0}
-.container{max-width:700px;margin:auto;padding:15px}
-.card{background:#1b1b1b;padding:16px;border-radius:16px;margin-bottom:15px}
-label{display:block;color:#bbb;margin:12px 0 7px}
-input[type=file],input[type=text],input[type=number],select{width:100%;padding:13px;border:0;border-radius:10px;background:#292929;color:#fff;margin-bottom:10px}
-input[type=range]{width:100%;accent-color:#00d9ff}
-button{width:100%;padding:14px;border:0;border-radius:11px;margin-top:9px;background:#00d9ff;color:#000;font-size:16px;font-weight:bold}
-button:active{transform:scale(.98)}
-.auto{background:#8b5cf6;color:#fff;font-size:18px;padding:17px}
-.secondary{background:#292929;color:#fff}
-.row{display:flex;gap:10px}.row button{flex:1}
-video{width:100%;background:#000;border-radius:12px;max-height:420px}
-audio{width:100%}.value{color:#00d9ff;font-weight:bold}
-#status{text-align:center;color:#00e5ff;min-height:22px}
-#autoInfo{display:none;color:#bbb;line-height:1.5;background:#121212;padding:12px;border-radius:10px;margin-top:10px}
-#download{display:none;width:100%;padding:14px;margin-top:10px;border-radius:11px;background:#20d46b;color:#000;text-align:center;text-decoration:none;font-weight:bold}
-#canvas{display:none}
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+body{
+  margin:0;
+  background:#0d0d0d;
+  color:white;
+  font-family:Arial,sans-serif;
+}
+
+header{
+  text-align:center;
+  padding:18px 10px;
+  background:#151515;
+  border-bottom:1px solid #333;
+}
+
+header h1{
+  margin:0;
+  font-size:25px;
+}
+
+header p{
+  margin:6px 0 0;
+  color:#999;
+}
+
+.container{
+  max-width:700px;
+  margin:auto;
+  padding:15px;
+}
+
+.card{
+  background:#181818;
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:15px;
+}
+
+label{
+  display:block;
+  color:#bbb;
+  font-size:17px;
+  margin:12px 0 7px;
+}
+
+input[type="file"],
+input[type="text"],
+input[type="number"],
+select{
+  width:100%;
+  padding:14px;
+  border:0;
+  border-radius:10px;
+  background:#292929;
+  color:white;
+  font-size:16px;
+}
+
+input[type="range"]{
+  width:100%;
+  accent-color:#00d9ff;
+}
+
+button{
+  width:100%;
+  padding:15px;
+  margin-top:10px;
+  border:0;
+  border-radius:12px;
+  background:#08cbea;
+  color:#000;
+  font-weight:bold;
+  font-size:17px;
+  cursor:pointer;
+}
+
+button:active{
+  transform:scale(.98);
+}
+
+.auto{
+  background:#8b4dff;
+  color:white;
+}
+
+.green{
+  background:#20d66b;
+}
+
+.red{
+  background:#e53935;
+  color:white;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+}
+
+.row button{
+  flex:1;
+}
+
+video{
+  width:100%;
+  max-height:420px;
+  background:#000;
+  border-radius:12px;
+  margin-top:10px;
+}
+
+canvas{
+  display:none;
+}
+
+.value{
+  float:right;
+  color:#00d9ff;
+  font-weight:bold;
+}
+
+.status{
+  text-align:center;
+  padding:10px;
+  color:#00d9ff;
+  min-height:25px;
+}
+
+.small{
+  color:#888;
+  font-size:13px;
+  margin-top:5px;
+}
 </style>
 </head>
+
 <body>
+
 <header>
-<h1>⚡ NAVAL AI VIDEO EDITOR</h1>
-<p>Manual + Automatic Editing Studio</p>
+  <h1>🎬 NAVAL AI VIDEO EDITOR</h1>
+  <p>Manual + Automatic Editing Studio</p>
 </header>
 
 <div class="container">
 
-<div class="card">
-<label>🎬 Video Select करो</label>
-<input id="videoFile" type="file" accept="video/*">
-<video id="video" controls playsinline></video>
-<p id="status">Video select करो</p>
+  <!-- VIDEO -->
+  <div class="card">
+
+    <label>🎥 Select Video</label>
+
+    <input
+      type="file"
+      id="videoFile"
+      accept="video/*"
+    >
+
+    <video
+      id="video"
+      controls
+      playsinline
+      preload="metadata">
+    </video>
+
+  </div>
+
+
+  <!-- MUSIC -->
+  <div class="card">
+
+    <label>🎵 Background Music</label>
+
+    <input
+      type="file"
+      id="musicFile"
+      accept="audio/*">
+
+    <audio
+      id="music"
+      controls
+      style="width:100%;margin-top:10px;">
+    </audio>
+
+  </div>
+
+
+  <!-- VOLUME -->
+  <div class="card">
+
+    <label>
+      🔊 Original Video Sound
+      <span class="value" id="videoVolumeValue">100%</span>
+    </label>
+
+    <input
+      type="range"
+      id="videoVolume"
+      min="0"
+      max="100"
+      value="100">
+
+    <label>
+      🎵 Background Music Volume
+      <span class="value" id="musicVolumeValue">30%</span>
+    </label>
+
+    <input
+      type="range"
+      id="musicVolume"
+      min="0"
+      max="100"
+      value="30">
+
+    <div class="small">
+      Exported video में दोनों sounds का volume इसी setting के अनुसार रहेगा।
+    </div>
+
+  </div>
+
+
+  <!-- TRIM -->
+  <div class="card">
+
+    <label>✂️ Start Time (seconds)</label>
+
+    <input
+      type="number"
+      id="start"
+      value="0"
+      min="0"
+      step="0.1">
+
+    <label>⏱️ End Time (seconds)</label>
+
+    <input
+      type="number"
+      id="end"
+      value="0"
+      min="0"
+      step="0.1">
+
+    <div class="row">
+
+      <button onclick="setStart()">
+        ✂️ SET START
+      </button>
+
+      <button onclick="setEnd()">
+        ✂️ SET END
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- TEXT -->
+  <div class="card">
+
+    <label>📝 Video Text</label>
+
+    <input
+      type="text"
+      id="videoText"
+      placeholder="NAVAL GAMING">
+
+  </div>
+
+
+  <!-- FILTER -->
+  <div class="card">
+
+    <label>🎨 Filter</label>
+
+    <select id="filter">
+
+      <option value="none">Normal</option>
+      <option value="grayscale(1)">Black & White</option>
+      <option value="sepia(0.7)">Vintage</option>
+      <option value="contrast(1.35) saturate(1.3)">Cinematic</option>
+      <option value="brightness(1.2) saturate(1.5)">Bright</option>
+      <option value="contrast(1.5)">High Contrast</option>
+      <option value="saturate(2)">Vivid</option>
+
+    </select>
+
+  </div>
+
+
+  <!-- AUTO EDIT -->
+  <div class="card">
+
+    <button
+      class="auto"
+      onclick="autoEdit()">
+      🤖 AUTO EDIT
+    </button>
+
+    <div class="small">
+      Auto Edit basic trim, cinematic filter और text setting automatically लगाएगा।
+    </div>
+
+  </div>
+
+
+  <!-- ACTIONS -->
+  <div class="card">
+
+    <button onclick="previewEdit()">
+      ▶️ PLAY EDIT
+    </button>
+
+    <button onclick="createEditedVideo()">
+      🎬 CREATE EDITED VIDEO
+    </button>
+
+    <button
+      class="green"
+      onclick="downloadEditedVideo()">
+      ⬇️ DOWNLOAD EDITED VIDEO
+    </button>
+
+    <button
+      class="red"
+      onclick="resetEditor()">
+      🔄 RESET
+    </button>
+
+  </div>
+
+
+  <div class="card">
+    <div
+      class="status"
+      id="status">
+      Video select करो
+    </div>
+  </div>
+
 </div>
 
-<div class="card">
-<button class="auto" onclick="autoEdit()">🤖 AUTO EDIT ✨</button>
-<div id="autoInfo"></div>
-</div>
-
-<div class="card">
-<label>✍️ Video Text</label>
-<input id="textInput" type="text" placeholder="NAVAL GAMING 🔥">
-
-<label>🎨 Filter</label>
-<select id="filter">
-<option value="none">Normal</option>
-<option value="grayscale(100%)">Black & White</option>
-<option value="sepia(100%)">Sepia</option>
-<option value="contrast(150%)">High Contrast</option>
-<option value="brightness(130%)">Bright</option>
-<option value="saturate(180%)">Color Boost</option>
-</select>
-
-<label>⚡ Speed</label>
-<select id="speed">
-<option value="0.5">0.5x</option>
-<option value="1" selected>1x Normal</option>
-<option value="1.5">1.5x</option>
-<option value="2">2x</option>
-</select>
-
-<label>🔄 Rotate</label>
-<select id="rotate">
-<option value="0">0°</option>
-<option value="90">90°</option>
-<option value="180">180°</option>
-<option value="270">270°</option>
-</select>
-
-<label>✍️ Text Size</label>
-<select id="textSize">
-<option value="small">Small</option>
-<option value="medium" selected>Medium</option>
-<option value="large">Large</option>
-</select>
-
-<label>📍 Text Position</label>
-<select id="textPosition">
-<option value="top">Top</option>
-<option value="center" selected>Center</option>
-<option value="bottom">Bottom</option>
-</select>
-</div>
-
-<div class="card">
-<label>🎵 Background Music</label>
-<input id="musicFile" type="file" accept="audio/*">
-<audio id="music" controls></audio>
-
-<label>🔊 Video Sound: <span id="videoVolText" class="value">100%</span></label>
-<input id="videoVolume" type="range" min="0" max="1" step="0.01" value="1">
-
-<label>🎵 Background Music: <span id="musicVolText" class="value">30%</span></label>
-<input id="musicVolume" type="range" min="0" max="1" step="0.01" value="0.3">
-</div>
-
-<div class="card">
-<label>✂️ Start Time (seconds)</label>
-<input id="start" type="number" value="0" min="0" step="0.1">
-
-<label>⏱️ End Time (seconds)</label>
-<input id="end" type="number" value="10" min="0" step="0.1">
-
-<div class="row">
-<button onclick="setStart()">START</button>
-<button onclick="setEnd()">END</button>
-</div>
-</div>
-
-<div class="card">
-<button onclick="playEdit()">▶️ PLAY EDIT</button>
-<button onclick="exportVideo()">🎬 CREATE EDITED VIDEO</button>
-<a id="download">⬇️ DOWNLOAD EDITED VIDEO</a>
-<button class="secondary" onclick="resetVideo()">🔄 RESET</button>
-</div>
 
 <canvas id="canvas"></canvas>
-</div>
+
 
 <script>
-const video=document.getElementById("video");
-const music=document.getElementById("music");
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
-const statusText=document.getElementById("status");
-let autoMode=false;
 
-document.getElementById("videoFile").addEventListener("change",function(){
-  const file=this.files[0]; if(!file)return;
-  video.src=URL.createObjectURL(file);
-  video.onloadedmetadata=()=>{
-    document.getElementById("end").value=video.duration.toFixed(1);
-    statusText.innerText="✅ Video loaded";
-  };
-});
+const video = document.getElementById("video");
+const music = document.getElementById("music");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-document.getElementById("musicFile").addEventListener("change",function(){
-  const file=this.files[0]; if(!file)return;
-  music.src=URL.createObjectURL(file);
-});
+const statusText = document.getElementById("status");
 
-document.getElementById("videoVolume").addEventListener("input",function(){
-  video.volume=Number(this.value);
-  document.getElementById("videoVolText").innerText=Math.round(this.value*100)+"%";
-});
+let videoURL = "";
+let musicURL = "";
 
-document.getElementById("musicVolume").addEventListener("input",function(){
-  music.volume=Number(this.value);
-  document.getElementById("musicVolText").innerText=Math.round(this.value*100)+"%";
-});
+let videoFileSelected = false;
+let musicFileSelected = false;
 
-document.getElementById("speed").addEventListener("change",function(){
-  video.playbackRate=Number(this.value);
-});
+let videoSource = null;
+let musicSource = null;
+let audioContext = null;
 
-function setStart(){video.currentTime=Number(document.getElementById("start").value)||0}
-function setEnd(){document.getElementById("end").value=video.currentTime.toFixed(1)}
+let editedBlob = null;
+let editedURL = "";
+
+let animationID = null;
+
+
+/* =========================
+   AUDIO SYSTEM
+========================= */
+
+function setupAudio(){
+
+  if(audioContext) return;
+
+  audioContext =
+    new (window.AudioContext ||
+         window.webkitAudioContext)();
+
+  videoSource =
+    audioContext.createMediaElementSource(video);
+
+  musicSource =
+    audioContext.createMediaElementSource(music);
+
+  videoSource.connect(audioContext.destination);
+  musicSource.connect(audioContext.destination);
+}
+
+
+function updateVolumes(){
+
+  const videoVolume =
+    Number(
+      document.getElementById("videoVolume").value
+    ) / 100;
+
+  const musicVolume =
+    Number(
+      document.getElementById("musicVolume").value
+    ) / 100;
+
+  document.getElementById(
+    "videoVolumeValue"
+  ).innerText =
+    Math.round(videoVolume * 100) + "%";
+
+  document.getElementById(
+    "musicVolumeValue"
+  ).innerText =
+    Math.round(musicVolume * 100) + "%";
+
+  video.volume = videoVolume;
+  music.volume = musicVolume;
+}
+
+
+document
+.getElementById("videoVolume")
+.addEventListener(
+  "input",
+  updateVolumes
+);
+
+
+document
+.getElementById("musicVolume")
+.addEventListener(
+  "input",
+  updateVolumes
+);
+
+
+/* =========================
+   VIDEO SELECT
+========================= */
+
+document
+.getElementById("videoFile")
+.addEventListener(
+  "change",
+  function(){
+
+    const file = this.files[0];
+
+    if(!file) return;
+
+    videoFileSelected = true;
+
+    videoURL =
+      URL.createObjectURL(file);
+
+    video.src = videoURL;
+
+    video.onloadedmetadata =
+      function(){
+
+        document.getElementById("start").value = 0;
+
+        document.getElementById("end").value =
+          video.duration.toFixed(1);
+
+        statusText.innerText =
+          "✅ Video loaded";
+
+        setupAudio();
+        updateVolumes();
+      };
+
+  }
+);
+
+
+/* =========================
+   MUSIC SELECT
+========================= */
+
+document
+.getElementById("musicFile")
+.addEventListener(
+  "change",
+  function(){
+
+    const file = this.files[0];
+
+    if(!file) return;
+
+    musicFileSelected = true;
+
+    musicURL =
+      URL.createObjectURL(file);
+
+    music.src = musicURL;
+
+    music.loop = true;
+
+    statusText.innerText =
+      "🎵 Background music loaded";
+
+    setupAudio();
+    updateVolumes();
+  }
+);
+
+
+/* =========================
+   START / END
+========================= */
+
+function setStart(){
+
+  if(!videoFileSelected){
+    alert("पहले video select करो");
+    return;
+  }
+
+  document.getElementById("start").value =
+    video.currentTime.toFixed(1);
+
+  statusText.innerText =
+    "✂️ Start time set";
+}
+
+
+function setEnd(){
+
+  if(!videoFileSelected){
+    alert("पहले video select करो");
+    return;
+  }
+
+  document.getElementById("end").value =
+    video.currentTime.toFixed(1);
+
+  statusText.innerText =
+    "✂️ End time set";
+}
+
+
+/* =========================
+   FILTER
+========================= */
+
+function getFilter(){
+
+  return document.getElementById(
+    "filter"
+  ).value;
+}
+
+
+/* =========================
+   DRAW VIDEO
+========================= */
+
+function drawFrame(){
+
+  if(!video.videoWidth){
+    return;
+  }
+
+  canvas.width =
+    video.videoWidth;
+
+  canvas.height =
+    video.videoHeight;
+
+  ctx.filter =
+    getFilter();
+
+  ctx.drawImage(
+    video,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  ctx.filter = "none";
+
+
+  /* TEXT */
+
+  const text =
+    document.getElementById(
+      "videoText"
+    ).value.trim();
+
+  if(text){
+
+    ctx.font =
+      "bold " +
+      Math.max(
+        30,
+        canvas.width * 0.055
+      ) +
+      "px Arial";
+
+    ctx.textAlign = "center";
+
+    ctx.textBaseline = "bottom";
+
+    ctx.fillStyle =
+      "white";
+
+    ctx.strokeStyle =
+      "black";
+
+    ctx.lineWidth = 5;
+
+    ctx.strokeText(
+      text,
+      canvas.width / 2,
+      canvas.height - 35
+    );
+
+    ctx.fillText(
+      text,
+      canvas.width / 2,
+      canvas.height - 35
+    );
+  }
+
+}
+
+
+/* =========================
+   PREVIEW
+========================= */
+
+async function previewEdit(){
+
+  if(!videoFileSelected){
+
+    alert("पहले video select करो");
+    return;
+  }
+
+  setupAudio();
+
+  if(
+    audioContext &&
+    audioContext.state === "suspended"
+  ){
+    await audioContext.resume();
+  }
+
+  updateVolumes();
+
+  const start =
+    Number(
+      document.getElementById("start").value
+    );
+
+  const end =
+    Number(
+      document.getElementById("end").value
+    );
+
+  if(end <= start){
+
+    alert("End time Start time से बड़ा होना चाहिए");
+    return;
+  }
+
+  video.currentTime = start;
+
+  if(musicFileSelected){
+    music.currentTime = 0;
+    music.play().catch(()=>{});
+  }
+
+  video.play().catch(()=>{});
+
+  statusText.innerText =
+    "▶️ Playing edit...";
+
+  video.ontimeupdate =
+    function(){
+
+      if(video.currentTime >= end){
+
+        video.pause();
+
+        if(musicFileSelected){
+          music.pause();
+        }
+
+        video.ontimeupdate = null;
+
+        statusText.innerText =
+          "✅ Preview finished";
+      }
+    };
+}
+
+
+/* =========================
+   AUTO EDIT
+========================= */
 
 function autoEdit(){
-  if(!video.src){alert("पहले video select करो");return}
 
-  autoMode=true;
-  const duration=video.duration||10;
+  if(!videoFileSelected){
 
-  /* Browser-only automatic preset:
-     chooses a short Shorts-style segment and applies sensible settings.
-     Real AI scene/quality detection requires a backend model. */
-  const clip=Math.min(duration,30);
-  const start=Math.max(0,(duration-clip)/2);
-
-  document.getElementById("start").value=start.toFixed(1);
-  document.getElementById("end").value=(start+clip).toFixed(1);
-  document.getElementById("speed").value="1";
-  document.getElementById("rotate").value="0";
-  document.getElementById("filter").value="contrast(150%)";
-  document.getElementById("textSize").value="medium";
-  document.getElementById("textPosition").value="bottom";
-  document.getElementById("videoVolume").value="1";
-  document.getElementById("musicVolume").value=music.src?"0.25":"0";
-  document.getElementById("videoVolText").innerText="100%";
-  document.getElementById("musicVolText").innerText=music.src?"25%":"0%";
-  video.volume=1;
-  music.volume=music.src?.25:0;
-
-  const info=document.getElementById("autoInfo");
-  info.style.display="block";
-  info.innerHTML=
-    "🤖 <b>Auto preset तैयार है!</b><br>"+
-    "✂️ Short clip: "+clip.toFixed(1)+" sec<br>"+
-    "🎨 Contrast filter<br>"+
-    "📍 Bottom text<br>"+
-    "🔊 Original sound: 100%<br>"+
-    "🎵 Music: "+(music.src?"25%":"Off")+"<br><br>"+
-    "अब <b>CREATE EDITED VIDEO</b> दबाकर final video बनाओ।";
-
-  statusText.innerText="✨ AUTO EDIT settings तैयार हैं";
-}
-
-function playEdit(){
-  if(!video.src){alert("पहले video select करो");return}
-  const start=Number(document.getElementById("start").value);
-  const end=Number(document.getElementById("end").value);
-  video.currentTime=start;
-  video.playbackRate=Number(document.getElementById("speed").value);
-  video.play();
-  if(music.src){music.currentTime=0;music.volume=Number(document.getElementById("musicVolume").value);music.play().catch(()=>{})}
-  const timer=setInterval(()=>{
-    if(video.currentTime>=end){
-      video.pause(); if(music.src)music.pause(); clearInterval(timer);
-      statusText.innerText="✅ Preview complete";
-    }
-  },100);
-}
-
-function resetVideo(){
-  video.pause(); if(music.src)music.pause();
-  video.currentTime=0; video.playbackRate=1;
-  document.getElementById("start").value=0;
-  if(video.duration)document.getElementById("end").value=video.duration.toFixed(1);
-  document.getElementById("speed").value="1";
-  document.getElementById("rotate").value="0";
-  document.getElementById("filter").value="none";
-  document.getElementById("textInput").value="";
-  document.getElementById("textSize").value="medium";
-  document.getElementById("textPosition").value="center";
-  document.getElementById("videoVolume").value="1";
-  document.getElementById("musicVolume").value="0.3";
-  document.getElementById("videoVolText").innerText="100%";
-  document.getElementById("musicVolText").innerText="30%";
-  document.getElementById("autoInfo").style.display="none";
-  statusText.innerText="🔄 Reset complete";
-}
-
-async function exportVideo(){
-  if(!video.src){alert("पहले video select करो");return}
-
-  const start=Number(document.getElementById("start").value);
-  const end=Number(document.getElementById("end").value);
-  const speed=Number(document.getElementById("speed").value);
-  const rotation=Number(document.getElementById("rotate").value);
-  const filter=document.getElementById("filter").value;
-  const text=document.getElementById("textInput").value;
-  const textSize=document.getElementById("textSize").value;
-  const textPosition=document.getElementById("textPosition").value;
-  const videoVol=Number(document.getElementById("videoVolume").value);
-  const musicVol=Number(document.getElementById("musicVolume").value);
-
-  if(end<=start){alert("End time Start time से बड़ा होना चाहिए");return}
-  statusText.innerText="⏳ Video तैयार हो रहा है...";
-
-  const w=video.videoWidth||720,h=video.videoHeight||1280;
-  if(rotation===90||rotation===270){canvas.width=h;canvas.height=w}
-  else{canvas.width=w;canvas.height=h}
-
-  const canvasStream=canvas.captureStream(30);
-  let audioContext=null,destination=null;
-
-  try{
-    audioContext=new (window.AudioContext||window.webkitAudioContext)();
-    destination=audioContext.createMediaStreamDestination();
-
-    const videoSource=audioContext.createMediaElementSource(video);
-    const videoGain=audioContext.createGain();
-    videoGain.gain.value=videoVol;
-    videoSource.connect(videoGain);
-    videoGain.connect(destination);
-    videoGain.connect(audioContext.destination);
-
-    if(music.src){
-      const musicSource=audioContext.createMediaElementSource(music);
-      const musicGain=audioContext.createGain();
-      musicGain.gain.value=musicVol;
-      musicSource.connect(musicGain);
-      musicGain.connect(destination);
-    }
-    await audioContext.resume();
-  }catch(e){console.log("Audio setup:",e)}
-
-  const finalStream=new MediaStream();
-  canvasStream.getVideoTracks().forEach(t=>finalStream.addTrack(t));
-  if(destination)destination.stream.getAudioTracks().forEach(t=>finalStream.addTrack(t));
-
-  const types=["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"];
-  const mime=types.find(t=>MediaRecorder.isTypeSupported(t));
-  if(!mime){alert("इस browser में video export supported नहीं है");return}
-
-  const recorder=new MediaRecorder(finalStream,{mimeType:mime});
-  const chunks=[];
-  recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
-
-  recorder.onstop=()=>{
-    const blob=new Blob(chunks,{type:mime});
-    const url=URL.createObjectURL(blob);
-    const download=document.getElementById("download");
-    download.href=url;
-    download.download="naval-auto-edited-video.webm";
-    download.style.display="block";
-    statusText.innerText="✅ Edited Video तैयार है!";
-    if(audioContext)audioContext.close().catch(()=>{});
-  };
-
-  video.currentTime=start;
-  video.playbackRate=speed;
-
-  await new Promise(resolve=>{
-    const fn=()=>{video.removeEventListener("seeked",fn);resolve()};
-    video.addEventListener("seeked",fn);
-  });
-
-  if(music.src){music.currentTime=0;music.volume=musicVol}
-  recorder.start();
-  video.play();
-  if(music.src)music.play().catch(()=>{});
-
-  function draw(){
-    if(video.paused||video.currentTime>=end){
-      video.pause();if(music.src)music.pause();recorder.stop();return;
-    }
-
-    ctx.save();
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.filter=filter;
-
-    if(rotation===90){
-      ctx.translate(canvas.width,0);ctx.rotate(Math.PI/2);ctx.drawImage(video,0,0,w,h);
-    }else if(rotation===180){
-      ctx.translate(canvas.width,canvas.height);ctx.rotate(Math.PI);ctx.drawImage(video,0,0,w,h);
-    }else if(rotation===270){
-      ctx.translate(0,canvas.height);ctx.rotate(-Math.PI/2);ctx.drawImage(video,0,0,w,h);
-    }else{
-      ctx.drawImage(video,0,0,w,h);
-    }
-    ctx.restore();
-
-    if(text){
-      let size=canvas.width/18;
-      if(textSize==="small")size=canvas.width/28;
-      if(textSize==="large")size=canvas.width/12;
-
-      let y=canvas.height-60;
-      if(textPosition==="top")y=size+30;
-      if(textPosition==="center")y=canvas.height/2;
-
-      ctx.font=size+"px Arial";
-      ctx.textAlign="center";ctx.textBaseline="middle";
-      ctx.lineWidth=Math.max(4,size/8);
-      ctx.strokeStyle="black";ctx.strokeText(text,canvas.width/2,y);
-      ctx.fillStyle="white";ctx.fillText(text,canvas.width/2,y);
-    }
-    requestAnimationFrame(draw);
+    alert("पहले video select करो");
+    return;
   }
-  draw();
+
+  const duration =
+    video.duration;
+
+  const end =
+    Math.min(
+      duration,
+      15
+    );
+
+  document.getElementById(
+    "start"
+  ).value = "0";
+
+  document.getElementById(
+    "end"
+  ).value =
+    end.toFixed(1);
+
+  document.getElementById(
+    "videoText"
+  ).value =
+    "NAVAL GAMING 🔥";
+
+  document.getElementById(
+    "filter"
+  ).value =
+    "contrast(1.35) saturate(1.3)";
+
+  document.getElementById(
+    "videoVolume"
+  ).value = 80;
+
+  document.getElementById(
+    "musicVolume"
+  ).value = 30;
+
+  updateVolumes();
+
+  statusText.innerText =
+    "🤖 AUTO EDIT applied successfully";
 }
+
+
+/* =========================
+   CREATE EDITED VIDEO
+========================= */
+
+async function createEditedVideo(){
+
+  if(!videoFileSelected){
+
+    alert("पहले video select करो");
+    return;
+  }
+
+  const start =
+    Number(
+      document.getElementById("start").value
+    );
+
+  const end =
+    Number(
+      document.getElementById("end").value
+    );
+
+  if(end <= start){
+
+    alert(
+      "End time Start time से बड़ा होना चाहिए"
+    );
+
+    return;
+  }
+
+
+  setupAudio();
+
+  if(
+    audioContext &&
+    audioContext.state === "suspended"
+  ){
+    await audioContext.resume();
+  }
+
+
+  statusText.innerText =
+    "⏳ Edited video बन रहा है...";
+
+
+  /* Canvas size */
+
+  canvas.width =
+    video.videoWidth;
+
+  canvas.height =
+    video.videoHeight;
+
+
+  /* Canvas stream */
+
+  const canvasStream =
+    canvas.captureStream(30);
+
+
+  /* Audio mixing */
+
+  const destination =
+    audioContext.createMediaStreamDestination();
+
+
+  const videoGain =
+    audioContext.createGain();
+
+  const musicGain =
+    audioContext.createGain();
+
+
+  videoGain.gain.value =
+    Number(
+      document.getElementById(
+        "videoVolume"
+      ).value
+    ) / 100;
+
+
+  musicGain.gain.value =
+    Number(
+      document.getElementById(
+        "musicVolume"
+      ).value
+    ) / 100;
+
+
+  videoSource.connect(
+    videoGain
+  );
+
+  musicSource.connect(
+    musicGain
+  );
+
+
+  videoGain.connect(
+    destination
+  );
+
+  musicGain.connect(
+    destination
+  );
+
+
+  /* Combine video + audio */
+
+  const combinedStream =
+    new MediaStream();
+
+  canvasStream
+    .getVideoTracks()
+    .forEach(
+      track =>
+        combinedStream.addTrack(track)
+    );
+
+  destination
+    .stream
+    .getAudioTracks()
+    .forEach(
+      track =>
+        combinedStream.addTrack(track)
+    );
+
+
+  /* Recorder */
+
+  let mimeType =
+    "video/webm;codecs=vp9,opus";
+
+  if(
+    !MediaRecorder.isTypeSupported(
+      mimeType
+    )
+  ){
+    mimeType =
+      "video/webm;codecs=vp8,opus";
+  }
+
+  if(
+    !MediaRecorder.isTypeSupported(
+      mimeType
+    )
+  ){
+    mimeType =
+      "video/webm";
+  }
+
+
+  const recorder =
+    new MediaRecorder(
+      combinedStream,
+      {
+        mimeType:mimeType
+      }
+    );
+
+
+  const chunks = [];
+
+
+  recorder.ondataavailable =
+    function(e){
+
+      if(e.data.size > 0){
+        chunks.push(e.data);
+      }
+
+    };
+
+
+  recorder.onstop =
+    function(){
+
+      editedBlob =
+        new Blob(
+          chunks,
+          {
+            type:
+              recorder.mimeType
+          }
+        );
+
+      editedURL =
+        URL.createObjectURL(
+          editedBlob
+        );
+
+
+      /* disconnect export gains */
+
+      try{
+        videoSource.disconnect(
+          videoGain
+        );
+
+        musicSource.disconnect(
+          musicGain
+        );
+      }catch(e){}
+
+
+      statusText.innerText =
+        "✅ Edited video तैयार है! अब Download दबाओ।";
+
+    };
+
+
+  /* Start */
+
+  video.pause();
+
+  if(musicFileSelected){
+    music.pause();
+  }
+
+
+  video.currentTime =
+    start;
+
+
+  await new Promise(
+    resolve => {
+
+      video.onseeked =
+        function(){
+
+          video.onseeked = null;
+
+          resolve();
+
+        };
+
+    }
+  );
+
+
+  recorder.start(200);
+
+
+  /* Music */
+
+  if(musicFileSelected){
+
+    music.currentTime = 0;
+
+    music.loop = true;
+
+    music.play().catch(()=>{});
+  }
+
+
+  /* Video */
+
+  video.play().catch(()=>{});
+
+
+  /* Draw loop */
+
+  function render(){
+
+    if(
+      video.paused ||
+      video.ended
+    ){
+      return;
+    }
+
+    drawFrame();
+
+    animationID =
+      requestAnimationFrame(
+        render
+      );
+  }
+
+
+  render();
+
+
+  /* Stop at end */
+
+  video.ontimeupdate =
+    function(){
+
+      if(
+        video.currentTime >= end
+      ){
+
+        video.pause();
+
+        if(musicFileSelected){
+          music.pause();
+        }
+
+        cancelAnimationFrame(
+          animationID
+        );
+
+        video.ontimeupdate = null;
+
+        recorder.stop();
+
+      }
+
+    };
+
+}
+
+
+/* =========================
+   DOWNLOAD
+========================= */
+
+function downloadEditedVideo(){
+
+  if(!editedBlob){
+
+    alert(
+      "पहले CREATE EDITED VIDEO दबाओ"
+    );
+
+    return;
+  }
+
+  const link =
+    document.createElement("a");
+
+  link.href =
+    editedURL;
+
+  link.download =
+    "NAVAL_EDITED_VIDEO.webm";
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  link.remove();
+
+  statusText.innerText =
+    "⬇️ Download started";
+}
+
+
+/* =========================
+   RESET
+========================= */
+
+function resetEditor(){
+
+  location.reload();
+
+}
+
+
+/* =========================
+   INITIAL VOLUME
+========================= */
+
+updateVolumes();
+
 </script>
+
 </body>
-  </html>
-                             
+      </html>                        
