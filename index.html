@@ -556,63 +556,175 @@ status("✅ Preview finished");
 
 function drawFrame(){
 
-if(!video.videoWidth)return;
+  if(!video.videoWidth)return;
 
-const format=document.getElementById("format").value;
+  const format=document.getElementById("format").value;
 
-let w=720;
-let h=1280;
+  let w=720;
+  let h=1280;
 
-if(format==="landscape"){
-w=1280;
-h=720;
-}
+  if(format==="landscape"){
+    w=1280;
+    h=720;
+  }
 
-if(format==="square"){
-w=1080;
-h=1080;
-}
+  if(format==="square"){
+    w=1080;
+    h=1080;
+  }
 
-canvas.width=w;
-canvas.height=h;
+  canvas.width=w;
+  canvas.height=h;
 
-ctx.fillStyle="#000";
-ctx.fillRect(0,0,w,h);
+  ctx.fillStyle="#000";
+  ctx.fillRect(0,0,w,h);
 
-const scale=Math.max(
-w/video.videoWidth,
-h/video.videoHeight
-);
+  /*
+   * AUTO ZOOM
+   * हल्का cinematic zoom
+   */
 
-const nw=video.videoWidth*scale;
-const nh=video.videoHeight*scale;
+  const start=
+    Number(document.getElementById("start").value)||0;
 
-const x=(w-nw)/2;
-const y=(h-nh)/2;
+  const end=
+    Number(document.getElementById("end").value)||video.duration;
 
-ctx.filter=document.getElementById("filter").value;
+  const duration=Math.max(0.1,end-start);
 
-ctx.drawImage(video,x,y,nw,nh);
+  const elapsed=
+    Math.max(0,video.currentTime-start);
 
-ctx.filter="none";
+  const progressTime=
+    Math.min(1,elapsed/duration);
 
-const text=
-document.getElementById("videoText").value.trim();
+  const zoom=
+    1 + (progressTime * 0.08);
 
-if(text){
+  /*
+   * SHAKE EFFECT
+   * gaming-style हल्का movement
+   */
 
-ctx.font="bold "+Math.max(35,w*.055)+"px Arial";
-ctx.textAlign="center";
-ctx.textBaseline="bottom";
-ctx.lineWidth=6;
+  const shakeAmount=3;
 
-ctx.strokeStyle="#000";
-ctx.fillStyle="#fff";
+  const shakeX=
+    (Math.random()-0.5)*shakeAmount;
 
-ctx.strokeText(text,w/2,h-70);
-ctx.fillText(text,w/2,h-70);
+  const shakeY=
+    (Math.random()-0.5)*shakeAmount;
 
-}
+  /*
+   * VIDEO SCALE
+   */
+
+  const scale=Math.max(
+    w/video.videoWidth,
+    h/video.videoHeight
+  ) * zoom;
+
+  const nw=video.videoWidth*scale;
+  const nh=video.videoHeight*scale;
+
+  const x=
+    (w-nw)/2 + shakeX;
+
+  const y=
+    (h-nh)/2 + shakeY;
+
+  /*
+   * FILTER
+   */
+
+  ctx.filter=
+    document.getElementById("filter").value;
+
+  ctx.drawImage(
+    video,
+    x,
+    y,
+    nw,
+    nh
+  );
+
+  ctx.filter="none";
+
+  /*
+   * FLASH EFFECT
+   * शुरुआत और अंत में हल्का flash
+   */
+
+  const flashTime=0.12;
+
+  let flash=0;
+
+  if(elapsed<flashTime){
+
+    flash=
+      1-(elapsed/flashTime);
+
+  }
+
+  if(elapsed>duration-flashTime){
+
+    flash=
+      Math.max(
+        flash,
+        (elapsed-(duration-flashTime))/flashTime
+      );
+
+  }
+
+  if(flash>0){
+
+    ctx.fillStyle=
+      "rgba(255,255,255,"+
+      Math.min(0.35,flash*0.35)+")";
+
+    ctx.fillRect(
+      0,
+      0,
+      w,
+      h
+    );
+
+  }
+
+  /*
+   * CAPTION
+   */
+
+  const text=
+    document.getElementById("videoText").value.trim();
+
+  if(text){
+
+    ctx.font=
+      "bold "+
+      Math.max(35,w*.055)+
+      "px Arial";
+
+    ctx.textAlign="center";
+    ctx.textBaseline="bottom";
+
+    ctx.lineWidth=6;
+
+    ctx.strokeStyle="#000";
+    ctx.fillStyle="#fff";
+
+    ctx.strokeText(
+      text,
+      w/2,
+      h-70
+    );
+
+    ctx.fillText(
+      text,
+      w/2,
+      h-70
+    );
+
+  }
 
 }
 
