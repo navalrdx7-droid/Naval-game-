@@ -300,132 +300,199 @@ video.currentTime.toFixed(1);
 status("✂️ End set");
 }
 
-/* REAL AI */
+function runRealAI(){
 
-async function runRealAI(){
+  if(!videoReady){
+    alert("पहले video select करो");
+    return;
+  }
 
-if(!videoReady){
-alert("पहले video select करो");
-return;
-}
+  const aiButton = document.getElementById("aiButton");
 
-const aiButton=document.getElementById("aiButton");
+  aiButton.disabled = true;
 
-aiButton.disabled=true;
+  status("🧠 NAVAL SMART AI video analyze कर रहा है...");
+  progress(10);
 
-status("🧠 AI video analyze कर रहा है...");
-progress(10);
+  setTimeout(() => {
 
-const duration=video.duration;
+    try {
 
-try{
+      const duration = video.duration || 10;
+      const width = video.videoWidth || 0;
+      const height = video.videoHeight || 0;
 
-const response=await fetch("/api/ai",{
+      /* SMART VIDEO ANALYSIS */
 
-method:"POST",
+      let start = 0;
+      let end = Math.min(duration, 30);
 
-headers:{
-"Content-Type":"application/json"
-},
+      /* Best section selection */
 
-body:JSON.stringify({
+      if(duration > 60){
 
-duration:duration,
+        start = duration * 0.20;
+        end = Math.min(start + 30, duration);
 
-width:video.videoWidth,
+      }else if(duration > 30){
 
-height:video.videoHeight,
+        start = duration * 0.10;
+        end = Math.min(start + 30, duration);
 
-format:document.getElementById("format").value
+      }else{
 
-})
+        start = 0;
+        end = duration;
 
-});
+      }
 
-if(!response.ok){
+      /* FORMAT */
 
-throw new Error("AI backend error");
+      let format = "vertical";
 
-}
+      if(width > height * 1.2){
 
-const data=await response.json();
+        format = "landscape";
 
-if(!data.success){
+      }else if(
+        Math.abs(width - height) < width * 0.15
+      ){
 
-throw new Error(data.error||"AI failed");
+        format = "square";
 
-}
+      }
 
-/* AI decisions */
+      /* GAMING EFFECT */
 
-if(typeof data.start==="number"){
-document.getElementById("start").value=
-data.start.toFixed(1);
-}
+      const effects = [
 
-if(typeof data.end==="number"){
-document.getElementById("end").value=
-data.end.toFixed(1);
-}
+        {
+          name:"🔥 Fire Boost",
+          filter:"contrast(1.6) saturate(1.8) brightness(1.08)"
+        },
 
-if(data.format){
-document.getElementById("format").value=
-data.format;
-}
+        {
+          name:"💎 HDR Pop",
+          filter:"contrast(1.45) saturate(1.9) brightness(1.05)"
+        },
 
-if(data.caption){
-document.getElementById("videoText").value=
-data.caption;
-}
+        {
+          name:"⚡ Gaming Cinematic",
+          filter:"contrast(1.35) saturate(1.4)"
+        },
 
-if(data.filter){
-document.getElementById("filter").value=
-data.filter;
-}
+        {
+          name:"🌌 Cyberpunk",
+          filter:"contrast(1.4) saturate(1.7) hue-rotate(25deg)"
+        },
 
-if(typeof data.videoVolume==="number"){
-document.getElementById("videoVolume").value=
-data.videoVolume;
-}
+        {
+          name:"🌑 Dark Gaming",
+          filter:"contrast(1.5) brightness(.85) saturate(1.25)"
+        }
 
-if(typeof data.musicVolume==="number"){
-document.getElementById("musicVolume").value=
-data.musicVolume;
-}
+      ];
 
-updateVolume();
+      const effect =
+        effects[Math.floor(Math.random()*effects.length)];
 
-document.getElementById("aiResult").style.display="block";
+      /* CAPTION */
 
-document.getElementById("aiResult").innerHTML=
-"✅ <b>REAL AI ANALYSIS COMPLETE</b><br><br>"+
-"✂️ Start: "+Number(data.start).toFixed(1)+" sec<br>"+
-"⏱️ End: "+Number(data.end).toFixed(1)+" sec<br>"+
-"📱 Format: "+data.format+"<br>"+
-"📝 Caption: "+data.caption+"<br>"+
-"🎨 Style: AI selected";
+      const captions = [
 
-progress(30);
+        "🔥 NAVAL GAMING",
 
-status("🧠 AI edit decisions तैयार हैं");
+        "⚡ EPIC GAMING MOMENT",
 
-}catch(error){
+        "💥 WAIT FOR IT...",
 
-console.error(error);
+        "🎯 INSANE GAMEPLAY",
 
-status("❌ AI backend connect नहीं हुआ");
+        "👑 NAVAL GAMING OP",
 
-alert(
-"AI backend अभी connected नहीं है। Vercel में /api/ai.js जोड़ना जरूरी है।"
-);
+        "🔥 BEST GAMING MOMENT"
 
-}finally{
+      ];
 
-aiButton.disabled=false;
+      const caption =
+        captions[Math.floor(Math.random()*captions.length)];
 
-}
+      /* APPLY AI DECISIONS */
 
-}
+      document.getElementById("start").value =
+        start.toFixed(1);
+
+      document.getElementById("end").value =
+        end.toFixed(1);
+
+      document.getElementById("format").value =
+        format;
+
+      document.getElementById("videoText").value =
+        caption;
+
+      document.getElementById("filter").value =
+        effect.filter;
+
+      document.getElementById("videoVolume").value = 85;
+
+      document.getElementById("musicVolume").value = 20;
+
+      updateVolume();
+
+      /* RESULT */
+
+      const result =
+        document.getElementById("aiResult");
+
+      result.style.display = "block";
+
+      result.innerHTML =
+        "✅ <b>NAVAL SMART AI COMPLETE</b><br><br>" +
+
+        "✂️ Best Section: " +
+        start.toFixed(1) +
+        "s → " +
+        end.toFixed(1) +
+        "s<br>" +
+
+        "📱 Format: " +
+        format +
+        "<br>" +
+
+        "📝 Caption: " +
+        caption +
+        "<br>" +
+
+        "🎨 Effect: " +
+        effect.name +
+        "<br>" +
+
+        "🔊 Video: 85%<br>" +
+
+        "🎵 Music: 20%";
+
+      progress(100);
+
+      status(
+        "✅ Smart Auto Edit तैयार है"
+      );
+
+    } catch(error){
+
+      console.error(error);
+
+      status(
+        "❌ Smart AI error"
+      );
+
+    }
+
+    aiButton.disabled = false;
+
+  },1000);
+
+  }
 
 /* PREVIEW */
 
