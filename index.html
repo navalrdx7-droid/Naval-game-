@@ -2,9 +2,9 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>NAVAL AI VIDEO EDITOR</title>
+<title>NAVAL AI VIDEO EDITOR V2</title>
 
 <style>
 
@@ -16,7 +16,7 @@
 body{
   margin:0;
   background:#080808;
-  color:#fff;
+  color:white;
   font-family:Arial,sans-serif;
 }
 
@@ -29,7 +29,7 @@ header{
 
 header h1{
   margin:0;
-  font-size:25px;
+  font-size:24px;
 }
 
 header p{
@@ -48,19 +48,17 @@ header p{
   border-radius:18px;
   padding:18px;
   margin-bottom:15px;
-  box-shadow:0 5px 20px rgba(0,0,0,.25);
 }
 
 label{
   display:block;
   color:#bbb;
-  font-size:16px;
   margin:12px 0 7px;
 }
 
-input[type="file"],
-input[type="text"],
-input[type="number"],
+input[type=file],
+input[type=text],
+input[type=number],
 select{
   width:100%;
   padding:14px;
@@ -69,10 +67,9 @@ select{
   background:#292929;
   color:white;
   font-size:16px;
-  outline:none;
 }
 
-input[type="range"]{
+input[type=range]{
   width:100%;
   accent-color:#00d9ff;
 }
@@ -87,7 +84,6 @@ button{
   color:#000;
   font-weight:bold;
   font-size:17px;
-  cursor:pointer;
 }
 
 button:active{
@@ -100,7 +96,7 @@ button:disabled{
 
 .auto{
   background:#8b4dff;
-  color:#fff;
+  color:white;
   font-size:19px;
 }
 
@@ -110,7 +106,7 @@ button:disabled{
 
 .red{
   background:#e53935;
-  color:#fff;
+  color:white;
 }
 
 .row{
@@ -124,7 +120,7 @@ button:disabled{
 
 video{
   width:100%;
-  max-height:420px;
+  max-height:430px;
   background:#000;
   border-radius:12px;
   margin-top:10px;
@@ -147,15 +143,8 @@ canvas{
 
 .status{
   text-align:center;
-  padding:10px;
   color:#00d9ff;
   min-height:25px;
-}
-
-.small{
-  color:#888;
-  font-size:13px;
-  margin-top:7px;
 }
 
 .progressBox{
@@ -176,12 +165,12 @@ canvas{
 
 .badge{
   display:inline-block;
-  background:#222;
+  margin-top:8px;
   padding:7px 10px;
   border-radius:20px;
+  background:#242424;
   color:#aaa;
   font-size:13px;
-  margin-top:8px;
 }
 
 </style>
@@ -191,9 +180,9 @@ canvas{
 
 <header>
 
-<h1>🎬 NAVAL AI VIDEO EDITOR</h1>
+<h1>🎬 NAVAL AI VIDEO EDITOR V2</h1>
 
-<p>🤖 Smart Automatic Video Editing Studio</p>
+<p>🤖 Smart Shorts & Reels Editor</p>
 
 </header>
 
@@ -220,9 +209,36 @@ playsinline
 preload="metadata">
 </video>
 
-<div class="badge" id="videoInfo">
+<div
+class="badge"
+id="videoInfo">
 No video selected
 </div>
+
+</div>
+
+
+<!-- FORMAT -->
+
+<div class="card">
+
+<label>📱 Export Format</label>
+
+<select id="format">
+
+<option value="vertical">
+📱 Shorts / Reels — 9:16
+</option>
+
+<option value="landscape">
+🖥️ Landscape — 16:9
+</option>
+
+<option value="square">
+⬛ Square — 1:1
+</option>
+
+</select>
 
 </div>
 
@@ -253,7 +269,7 @@ controls>
 
 <label>
 
-🔊 Original Video Sound
+🔊 Original Sound
 
 <span
 class="value"
@@ -273,7 +289,7 @@ value="100"
 
 <label>
 
-🎵 Music Volume
+🎵 Music
 
 <span
 class="value"
@@ -321,11 +337,11 @@ step="0.1"
 <div class="row">
 
 <button onclick="setStart()">
-✂️ SET START
+SET START
 </button>
 
 <button onclick="setEnd()">
-✂️ SET END
+SET END
 </button>
 
 </div>
@@ -337,7 +353,7 @@ step="0.1"
 
 <div class="card">
 
-<label>📝 Video Text</label>
+<label>📝 Caption / Text</label>
 
 <input
 type="text"
@@ -352,7 +368,7 @@ placeholder="NAVAL GAMING 🔥"
 
 <div class="card">
 
-<label>🎨 Video Style</label>
+<label>🎨 Style</label>
 
 <select id="filter">
 
@@ -380,8 +396,25 @@ Normal
 🎞️ Vintage
 </option>
 
-<option value="contrast(1.5)">
-💥 High Contrast
+</select>
+
+</div>
+
+
+<!-- EFFECT -->
+
+<div class="card">
+
+<label>✨ Effects</label>
+
+<select id="effect">
+
+<option value="none">
+None
+</option>
+
+<option value="fade">
+Fade In + Fade Out
 </option>
 
 </select>
@@ -398,13 +431,13 @@ class="auto"
 id="autoButton"
 onclick="autoEdit()">
 
-🤖 AUTO EDIT
+🤖 AUTO EDIT V2
 
 </button>
 
-<div class="small">
+<div class="badge">
 
-One-click automatic editing
+One-click Shorts/Reels editing
 
 </div>
 
@@ -416,18 +449,12 @@ One-click automatic editing
 <div class="card">
 
 <button onclick="previewEdit()">
-
 ▶️ PLAY PREVIEW
-
 </button>
-
 
 <button onclick="createEditedVideo()">
-
-🎬 CREATE EDITED VIDEO
-
+🎬 CREATE VIDEO
 </button>
-
 
 <button
 class="green"
@@ -437,7 +464,6 @@ onclick="downloadEditedVideo()">
 ⬇️ DOWNLOAD VIDEO
 
 </button>
-
 
 <button
 class="red"
@@ -482,7 +508,6 @@ id="progressBar">
 
 <script>
 
-
 const video =
 document.getElementById("video");
 
@@ -501,81 +526,78 @@ document.getElementById("status");
 const progressBar =
 document.getElementById("progressBar");
 
-const downloadButton =
-document.getElementById("downloadButton");
-
 const autoButton =
 document.getElementById("autoButton");
 
-
-let videoURL = "";
-let musicURL = "";
-
-let videoFileSelected = false;
-let musicFileSelected = false;
-
-let editedBlob = null;
-let editedURL = "";
-
-let audioContext = null;
-
-let videoSource = null;
-let musicSource = null;
-
-let animationID = null;
-
-let exporting = false;
+const downloadButton =
+document.getElementById("downloadButton");
 
 
-/* =========================
-   STATUS
-========================= */
+let videoURL="";
+let musicURL="";
+
+let videoFileSelected=false;
+let musicFileSelected=false;
+
+let audioContext=null;
+
+let videoSource=null;
+let musicSource=null;
+
+let editedBlob=null;
+let editedURL="";
+
+let animationID=null;
+
+let exporting=false;
+
+
+/* STATUS */
 
 function setStatus(text){
 
-  statusText.innerText = text;
+  statusText.innerText=text;
 
 }
 
 
-/* =========================
-   PROGRESS
-========================= */
+/* PROGRESS */
 
 function setProgress(value){
 
-  value =
-    Math.max(
-      0,
-      Math.min(100,value)
-    );
+  value=Math.max(
+    0,
+    Math.min(100,value)
+  );
 
-  progressBar.style.width =
-    value + "%";
+  progressBar.style.width=
+    value+"%";
 
 }
 
 
-/* =========================
-   AUDIO
-========================= */
+/* AUDIO */
 
 function setupAudio(){
 
   if(audioContext)
     return;
 
-  audioContext =
-    new (
+  audioContext=
+    new(
       window.AudioContext ||
       window.webkitAudioContext
     )();
 
-  videoSource =
-    audioContext.createMediaElementSource(video);
+  videoSource=
+    audioContext.createMediaElementSource(
+      video
+    );
 
-  musicSource =
-    audioContext.createMediaElementSource(music);
+  musicSource=
+    audioContext.createMediaElementSource(
+      music
+    );
 
   videoSource.connect(
     audioContext.destination
@@ -588,45 +610,36 @@ function setupAudio(){
 }
 
 
-/* =========================
-   VOLUME
-========================= */
+/* VOLUME */
 
 function updateVolumes(){
 
-  const videoVolume =
+  const vv=
     Number(
       document.getElementById(
         "videoVolume"
       ).value
-    ) / 100;
+    )/100;
 
-  const musicVolume =
+  const mv=
     Number(
       document.getElementById(
         "musicVolume"
       ).value
-    ) / 100;
+    )/100;
 
   document.getElementById(
     "videoVolumeValue"
-  ).innerText =
-    Math.round(
-      videoVolume * 100
-    ) + "%";
+  ).innerText=
+    Math.round(vv*100)+"%";
 
   document.getElementById(
     "musicVolumeValue"
-  ).innerText =
-    Math.round(
-      musicVolume * 100
-    ) + "%";
+  ).innerText=
+    Math.round(mv*100)+"%";
 
-  video.volume =
-    videoVolume;
-
-  music.volume =
-    musicVolume;
+  video.volume=vv;
+  music.volume=mv;
 
 }
 
@@ -638,7 +651,6 @@ document
   updateVolumes
 );
 
-
 document
 .getElementById("musicVolume")
 .addEventListener(
@@ -647,9 +659,7 @@ document
 );
 
 
-/* =========================
-   VIDEO
-========================= */
+/* VIDEO SELECT */
 
 document
 .getElementById("videoFile")
@@ -657,49 +667,42 @@ document
   "change",
   function(){
 
-    const file =
-      this.files[0];
+    const file=this.files[0];
 
     if(!file)
       return;
 
-    videoFileSelected = true;
+    videoFileSelected=true;
 
-    if(videoURL)
-      URL.revokeObjectURL(videoURL);
-
-    videoURL =
+    videoURL=
       URL.createObjectURL(file);
 
-    video.src =
-      videoURL;
+    video.src=videoURL;
 
-    video.onloadedmetadata =
+    video.onloadedmetadata=
       function(){
 
         document.getElementById(
           "start"
-        ).value = 0;
+        ).value=0;
 
         document.getElementById(
           "end"
-        ).value =
+        ).value=
           video.duration.toFixed(1);
 
         document.getElementById(
           "videoInfo"
-        ).innerText =
-          "🎥 " +
-          Math.round(video.duration) +
+        ).innerText=
+          "🎥 "+
+          Math.round(video.duration)+
           " sec video";
 
         setStatus(
-          "✅ Video loaded successfully"
+          "✅ Video loaded"
         );
 
         setProgress(0);
-
-        updateVolumes();
 
       };
 
@@ -707,9 +710,7 @@ document
 );
 
 
-/* =========================
-   MUSIC
-========================= */
+/* MUSIC */
 
 document
 .getElementById("musicFile")
@@ -717,36 +718,29 @@ document
   "change",
   function(){
 
-    const file =
-      this.files[0];
+    const file=this.files[0];
 
     if(!file)
       return;
 
-    musicFileSelected = true;
+    musicFileSelected=true;
 
-    if(musicURL)
-      URL.revokeObjectURL(musicURL);
-
-    musicURL =
+    musicURL=
       URL.createObjectURL(file);
 
-    music.src =
-      musicURL;
+    music.src=musicURL;
 
-    music.loop = true;
+    music.loop=true;
 
     setStatus(
-      "🎵 Background music loaded"
+      "🎵 Music loaded"
     );
 
   }
 );
 
 
-/* =========================
-   START
-========================= */
+/* START */
 
 function setStart(){
 
@@ -761,19 +755,17 @@ function setStart(){
 
   document.getElementById(
     "start"
-  ).value =
+  ).value=
     video.currentTime.toFixed(1);
 
   setStatus(
-    "✂️ Start time set"
+    "✂️ Start set"
   );
 
 }
 
 
-/* =========================
-   END
-========================= */
+/* END */
 
 function setEnd(){
 
@@ -788,100 +780,176 @@ function setEnd(){
 
   document.getElementById(
     "end"
-  ).value =
+  ).value=
     video.currentTime.toFixed(1);
 
   setStatus(
-    "✂️ End time set"
+    "✂️ End set"
   );
 
 }
 
 
-/* =========================
-   FILTER
-========================= */
+/* FORMAT */
 
-function getFilter(){
+function getFormat(){
 
   return document.getElementById(
-    "filter"
+    "format"
   ).value;
 
 }
 
 
-/* =========================
-   DRAW FRAME
-========================= */
+/* DRAW */
 
 function drawFrame(){
 
   if(!video.videoWidth)
     return;
 
-  canvas.width =
-    video.videoWidth;
 
-  canvas.height =
-    video.videoHeight;
+  const format=
+    getFormat();
 
-  ctx.filter =
-    getFilter();
+
+  let cw;
+  let ch;
+
+
+  if(format==="vertical"){
+
+    cw=720;
+    ch=1280;
+
+  }
+
+  else if(format==="square"){
+
+    cw=1080;
+    ch=1080;
+
+  }
+
+  else{
+
+    cw=1280;
+    ch=720;
+
+  }
+
+
+  canvas.width=cw;
+  canvas.height=ch;
+
+
+  ctx.clearRect(
+    0,
+    0,
+    cw,
+    ch
+  );
+
+
+  /*
+    BACKGROUND
+  */
+
+  ctx.fillStyle="#000";
+
+  ctx.fillRect(
+    0,
+    0,
+    cw,
+    ch
+  );
+
+
+  /*
+    COVER CROP
+  */
+
+  const scale=
+    Math.max(
+      cw/video.videoWidth,
+      ch/video.videoHeight
+    );
+
+
+  const nw=
+    video.videoWidth*scale;
+
+  const nh=
+    video.videoHeight*scale;
+
+
+  const x=
+    (cw-nw)/2;
+
+  const y=
+    (ch-nh)/2;
+
+
+  ctx.filter=
+    document.getElementById(
+      "filter"
+    ).value;
+
 
   ctx.drawImage(
     video,
-    0,
-    0,
-    canvas.width,
-    canvas.height
+    x,
+    y,
+    nw,
+    nh
   );
 
-  ctx.filter =
-    "none";
+
+  ctx.filter="none";
 
 
-  /* TEXT */
+  /*
+    TEXT
+  */
 
-  const text =
+  const text=
     document.getElementById(
       "videoText"
     ).value.trim();
 
+
   if(text){
 
-    ctx.font =
-      "bold " +
+    ctx.font=
+      "bold "+
       Math.max(
-        30,
-        canvas.width * .055
-      ) +
+        35,
+        cw*.055
+      )+
       "px Arial";
 
-    ctx.textAlign =
-      "center";
+    ctx.textAlign="center";
 
-    ctx.textBaseline =
-      "bottom";
+    ctx.textBaseline="bottom";
 
-    ctx.fillStyle =
-      "white";
+    ctx.lineWidth=6;
 
-    ctx.strokeStyle =
-      "black";
+    ctx.strokeStyle="black";
 
-    ctx.lineWidth = 5;
+    ctx.fillStyle="white";
+
 
     ctx.strokeText(
       text,
-      canvas.width / 2,
-      canvas.height - 35
+      cw/2,
+      ch-70
     );
+
 
     ctx.fillText(
       text,
-      canvas.width / 2,
-      canvas.height - 35
+      cw/2,
+      ch-70
     );
 
   }
@@ -889,9 +957,7 @@ function drawFrame(){
 }
 
 
-/* =========================
-   PREVIEW
-========================= */
+/* PREVIEW */
 
 async function previewEdit(){
 
@@ -904,21 +970,24 @@ async function previewEdit(){
     return;
   }
 
-  const start =
+
+  const start=
     Number(
       document.getElementById(
         "start"
       ).value
     );
 
-  const end =
+
+  const end=
     Number(
       document.getElementById(
         "end"
       ).value
     );
 
-  if(end <= start){
+
+  if(end<=start){
 
     alert(
       "End time सही करो"
@@ -927,64 +996,63 @@ async function previewEdit(){
     return;
   }
 
-  try{
 
-    video.currentTime =
-      start;
+  video.currentTime=start;
 
-    if(musicFileSelected){
 
-      music.currentTime = 0;
+  if(musicFileSelected){
 
-      music.play().catch(
-        ()=>{}
-      );
+    music.currentTime=0;
 
-    }
-
-    await video.play();
-
-    setStatus(
-      "▶️ Preview चल रहा है..."
-    );
-
-    video.ontimeupdate =
-      function(){
-
-        if(
-          video.currentTime >= end
-        ){
-
-          video.pause();
-
-          if(musicFileSelected)
-            music.pause();
-
-          video.ontimeupdate =
-            null;
-
-          setStatus(
-            "✅ Preview finished"
-          );
-
-        }
-
-      };
-
-  }catch(error){
-
-    setStatus(
-      "⚠️ Preview शुरू नहीं हुआ"
+    music.play().catch(
+      ()=>{}
     );
 
   }
 
+
+  try{
+
+    await video.play();
+
+  }catch(e){
+
+    return;
+
+  }
+
+
+  setStatus(
+    "▶️ Preview चल रहा है..."
+  );
+
+
+  video.ontimeupdate=
+    function(){
+
+      if(
+        video.currentTime>=end
+      ){
+
+        video.pause();
+
+        if(musicFileSelected)
+          music.pause();
+
+        video.ontimeupdate=null;
+
+        setStatus(
+          "✅ Preview finished"
+        );
+
+      }
+
+    };
+
 }
 
 
-/* =========================
-   AUTO EDIT
-========================= */
+/* AUTO EDIT */
 
 async function autoEdit(){
 
@@ -997,21 +1065,22 @@ async function autoEdit(){
     return;
   }
 
+
   if(exporting)
     return;
 
 
-  const duration =
+  const duration=
     video.duration;
 
 
   if(
     !duration ||
-    duration <= 0
+    duration<=0
   ){
 
     alert(
-      "Video अभी load हो रही है"
+      "Video load होने दो"
     );
 
     return;
@@ -1019,94 +1088,111 @@ async function autoEdit(){
 
 
   /*
-    SMART AUTO SETTINGS
+    SMART SHORT LENGTH
   */
 
-  let editLength;
-
-
-  if(duration <= 15){
-
-    editLength =
-      duration;
-
-  }else{
-
-    editLength =
-      Math.min(
-        duration,
-        20
-      );
-
-  }
+  const length=
+    Math.min(
+      duration,
+      20
+    );
 
 
   document.getElementById(
     "start"
-  ).value = 0;
+  ).value=0;
 
 
   document.getElementById(
     "end"
-  ).value =
-    editLength.toFixed(1);
+  ).value=
+    length.toFixed(1);
 
+
+  /*
+    AUTO SHORTS MODE
+  */
+
+  document.getElementById(
+    "format"
+  ).value=
+    "vertical";
+
+
+  /*
+    AUTO CAPTION
+  */
 
   document.getElementById(
     "videoText"
-  ).value =
+  ).value=
     "NAVAL GAMING 🔥";
 
 
+  /*
+    CINEMATIC
+  */
+
   document.getElementById(
     "filter"
-  ).value =
+  ).value=
     "contrast(1.35) saturate(1.4)";
 
 
+  /*
+    EFFECT
+  */
+
+  document.getElementById(
+    "effect"
+  ).value=
+    "fade";
+
+
+  /*
+    AUDIO
+  */
+
   document.getElementById(
     "videoVolume"
-  ).value = 80;
-
+  ).value=80;
 
   document.getElementById(
     "musicVolume"
-  ).value = 30;
+  ).value=30;
 
 
   updateVolumes();
 
 
-  setStatus(
-    "🤖 AI Auto Edit settings तैयार..."
-  );
-
-
   setProgress(10);
 
 
+  setStatus(
+    "🤖 Auto Edit V2 तैयार हो रहा है..."
+  );
+
+
   /*
-    AUTO EXPORT
+    AUTOMATIC EXPORT
   */
 
   setTimeout(
-    async function(){
+    function(){
 
-      await createEditedVideo(true);
+      createEditedVideo(true);
 
     },
-    500
+    600
   );
 
 }
 
 
-/* =========================
-   CREATE EDITED VIDEO
-========================= */
+/* CREATE */
 
 async function createEditedVideo(
-  automatic = false
+  automatic=false
 ){
 
   if(!videoFileSelected){
@@ -1123,7 +1209,7 @@ async function createEditedVideo(
     return;
 
 
-  const start =
+  const start=
     Number(
       document.getElementById(
         "start"
@@ -1131,7 +1217,7 @@ async function createEditedVideo(
     );
 
 
-  const end =
+  const end=
     Number(
       document.getElementById(
         "end"
@@ -1139,7 +1225,7 @@ async function createEditedVideo(
     );
 
 
-  if(end <= start){
+  if(end<=start){
 
     alert(
       "End time सही करो"
@@ -1149,26 +1235,21 @@ async function createEditedVideo(
   }
 
 
-  exporting = true;
+  exporting=true;
 
-  autoButton.disabled = true;
+  autoButton.disabled=true;
 
-  downloadButton.disabled = true;
+  downloadButton.disabled=true;
 
 
   try{
 
 
-    /*
-      AUDIO CONTEXT
-    */
-
     setupAudio();
 
 
     if(
-      audioContext.state ===
-      "suspended"
+      audioContext.state==="suspended"
     ){
 
       await audioContext.resume();
@@ -1178,8 +1259,8 @@ async function createEditedVideo(
 
     setStatus(
       automatic
-      ? "🤖 Auto editing शुरू..."
-      : "⏳ Video editing शुरू..."
+      ? "🤖 AI Auto Edit export हो रहा है..."
+      : "🎬 Video export हो रहा है..."
     );
 
 
@@ -1190,14 +1271,10 @@ async function createEditedVideo(
       CANVAS
     */
 
-    canvas.width =
-      video.videoWidth;
-
-    canvas.height =
-      video.videoHeight;
+    drawFrame();
 
 
-    const canvasStream =
+    const canvasStream=
       canvas.captureStream(30);
 
 
@@ -1205,31 +1282,32 @@ async function createEditedVideo(
       AUDIO MIX
     */
 
-    const destination =
-      audioContext.createMediaStreamDestination();
+    const destination=
+      audioContext
+      .createMediaStreamDestination();
 
 
-    const videoGain =
+    const videoGain=
       audioContext.createGain();
 
-    const musicGain =
+    const musicGain=
       audioContext.createGain();
 
 
-    videoGain.gain.value =
+    videoGain.gain.value=
       Number(
         document.getElementById(
           "videoVolume"
         ).value
-      ) / 100;
+      )/100;
 
 
-    musicGain.gain.value =
+    musicGain.gain.value=
       Number(
         document.getElementById(
           "musicVolume"
         ).value
-      ) / 100;
+      )/100;
 
 
     videoSource.connect(
@@ -1250,91 +1328,85 @@ async function createEditedVideo(
     );
 
 
-    const combinedStream =
+    /*
+      STREAM
+    */
+
+    const combinedStream=
       new MediaStream();
 
 
     canvasStream
-    .getVideoTracks()
-    .forEach(
-      track =>
-        combinedStream.addTrack(track)
-    );
+      .getVideoTracks()
+      .forEach(
+        track=>
+          combinedStream.addTrack(track)
+      );
 
 
     destination
-    .stream
-    .getAudioTracks()
-    .forEach(
-      track =>
-        combinedStream.addTrack(track)
-    );
+      .stream
+      .getAudioTracks()
+      .forEach(
+        track=>
+          combinedStream.addTrack(track)
+      );
 
 
     /*
       RECORDER
     */
 
-    let mimeType =
+    let mime=
       "video/webm;codecs=vp9,opus";
 
 
     if(
-      !MediaRecorder.isTypeSupported(
-        mimeType
-      )
+      !MediaRecorder
+      .isTypeSupported(mime)
     ){
 
-      mimeType =
+      mime=
         "video/webm;codecs=vp8,opus";
 
     }
 
 
     if(
-      !MediaRecorder.isTypeSupported(
-        mimeType
-      )
+      !MediaRecorder
+      .isTypeSupported(mime)
     ){
 
-      mimeType =
-        "video/webm";
+      mime="video/webm";
 
     }
 
 
-    const recorder =
+    const recorder=
       new MediaRecorder(
         combinedStream,
         {
-          mimeType:mimeType
+          mimeType:mime
         }
       );
 
 
-    const chunks = [];
+    const chunks=[];
 
 
-    recorder.ondataavailable =
-      function(event){
+    recorder.ondataavailable=
+      function(e){
 
-        if(
-          event.data.size > 0
-        ){
-
-          chunks.push(
-            event.data
-          );
-
-        }
+        if(e.data.size>0)
+          chunks.push(e.data);
 
       };
 
 
-    recorder.onstop =
+    recorder.onstop=
       function(){
 
-        editedBlob =
+        editedBlob=
           new Blob(
             chunks,
             {
@@ -1353,7 +1425,7 @@ async function createEditedVideo(
         }
 
 
-        editedURL =
+        editedURL=
           URL.createObjectURL(
             editedBlob
           );
@@ -1372,13 +1444,11 @@ async function createEditedVideo(
         }catch(e){}
 
 
-        exporting = false;
+        exporting=false;
 
-        autoButton.disabled =
-          false;
+        autoButton.disabled=false;
 
-        downloadButton.disabled =
-          false;
+        downloadButton.disabled=false;
 
 
         setProgress(100);
@@ -1397,24 +1467,22 @@ async function createEditedVideo(
 
     video.pause();
 
-
     if(musicFileSelected)
       music.pause();
 
 
-    video.currentTime =
-      start;
+    video.currentTime=start;
 
 
     await new Promise(
-      resolve => {
+      resolve=>{
 
-        const seekHandler =
+        const handler=
           function(){
 
             video.removeEventListener(
               "seeked",
-              seekHandler
+              handler
             );
 
             resolve();
@@ -1424,7 +1492,7 @@ async function createEditedVideo(
 
         video.addEventListener(
           "seeked",
-          seekHandler
+          handler
         );
 
       }
@@ -1432,24 +1500,17 @@ async function createEditedVideo(
 
 
     /*
-      START RECORDING
+      RECORD
     */
 
     recorder.start(200);
 
 
-    setProgress(20);
-
-
-    /*
-      MUSIC
-    */
-
     if(musicFileSelected){
 
-      music.currentTime = 0;
+      music.currentTime=0;
 
-      music.loop = true;
+      music.loop=true;
 
       music.play().catch(
         ()=>{}
@@ -1458,15 +1519,11 @@ async function createEditedVideo(
     }
 
 
-    /*
-      VIDEO
-    */
-
     await video.play();
 
 
     /*
-      RENDER LOOP
+      RENDER
     */
 
     function render(){
@@ -1474,29 +1531,24 @@ async function createEditedVideo(
       if(
         video.paused ||
         video.ended
-      ){
-
+      )
         return;
-
-      }
 
 
       drawFrame();
 
 
-      const elapsed =
-        video.currentTime - start;
-
-      const total =
-        end - start;
+      const elapsed=
+        video.currentTime-start;
 
 
-      const percent =
-        20 +
-        (
-          elapsed /
-          total
-        ) * 75;
+      const total=
+        end-start;
+
+
+      const percent=
+        20+
+        (elapsed/total)*75;
 
 
       setProgress(
@@ -1507,7 +1559,7 @@ async function createEditedVideo(
       );
 
 
-      animationID =
+      animationID=
         requestAnimationFrame(
           render
         );
@@ -1522,11 +1574,11 @@ async function createEditedVideo(
       STOP
     */
 
-    video.ontimeupdate =
+    video.ontimeupdate=
       function(){
 
         if(
-          video.currentTime >= end
+          video.currentTime>=end
         ){
 
           video.pause();
@@ -1541,8 +1593,7 @@ async function createEditedVideo(
           );
 
 
-          video.ontimeupdate =
-            null;
+          video.ontimeupdate=null;
 
 
           drawFrame();
@@ -1560,25 +1611,20 @@ async function createEditedVideo(
     console.error(error);
 
 
-    exporting = false;
+    exporting=false;
 
-    autoButton.disabled =
-      false;
+    autoButton.disabled=false;
 
-    downloadButton.disabled =
-      false;
-
+    downloadButton.disabled=false;
 
     setProgress(0);
 
-
     setStatus(
-      "❌ Export में समस्या आई"
+      "❌ Export failed"
     );
 
-
     alert(
-      "Browser इस video/audio format को export नहीं कर पा रहा है."
+      "Browser इस video/audio format को export नहीं कर पाया."
     );
 
   }
@@ -1586,9 +1632,7 @@ async function createEditedVideo(
 }
 
 
-/* =========================
-   DOWNLOAD
-========================= */
+/* DOWNLOAD */
 
 function downloadEditedVideo(){
 
@@ -1602,18 +1646,15 @@ function downloadEditedVideo(){
   }
 
 
-  const link =
-    document.createElement(
-      "a"
-    );
+  const link=
+    document.createElement("a");
 
 
-  link.href =
-    editedURL;
+  link.href=editedURL;
 
 
-  link.download =
-    "NAVAL_AI_EDITED_VIDEO.webm";
+  link.download=
+    "NAVAL_AI_SHORT_EDIT.webm";
 
 
   document.body.appendChild(
@@ -1634,9 +1675,7 @@ function downloadEditedVideo(){
 }
 
 
-/* =========================
-   RESET
-========================= */
+/* RESET */
 
 function resetEditor(){
 
@@ -1645,16 +1684,13 @@ function resetEditor(){
 }
 
 
-/* =========================
-   INITIAL
-========================= */
+/* INITIAL */
 
-downloadButton.disabled =
-  true;
+downloadButton.disabled=true;
 
 updateVolumes();
 
 </script>
 
 </body>
-  </html>
+                         </html>
