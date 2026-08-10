@@ -658,49 +658,68 @@ Math.max(0,Math.min(100,v))+"%";
 
 /* VIDEO */
 
-document.getElementById("videoFile")
-.addEventListener("change",function(){
+document.getElementById("videoFile").addEventListener("change", function(){
 
-const file=this.files[0];
+    const file = this.files && this.files[0];
 
-if(!file)return;
+    if (!file) return;
 
-if(videoURL)
-URL.revokeObjectURL(videoURL);
+    if (videoURL) {
+        URL.revokeObjectURL(videoURL);
+    }
 
-videoURL=URL.createObjectURL(file);
+    videoURL = URL.createObjectURL(file);
 
-video.src=videoURL;
-video.load();
+    videoReady = false;
 
-video.onloadedmetadata=function(){
+    video.pause();
+    video.removeAttribute("src");
+    video.load();
 
-videoReady=true;
+    video.src = videoURL;
+    video.controls = true;
+    video.muted = false;
+    video.volume = 1;
 
-document.getElementById("start").value=0;
+    video.onloadedmetadata = function(){
 
-document.getElementById("end").value=
-video.duration.toFixed(1);
+        videoReady = true;
 
-document.getElementById("videoInfo").innerText=
-"🎥 "+
-Math.round(video.duration)+
-" sec • "+
-video.videoWidth+
-"x"+
-video.videoHeight;
+        document.getElementById("start").value = 0;
 
-status("✅ Video ready");
+        document.getElementById("end").value =
+            video.duration.toFixed(1);
 
-progress(0);
+        document.getElementById("videoInfo").innerText =
+            "🎥 " +
+            Math.round(video.duration) +
+            " sec • " +
+            video.videoWidth +
+            "x" +
+            video.videoHeight;
 
-};
+        status("✅ Video ready — ▶️ Play दबाओ");
 
-video.onerror=function(){
-status("❌ Video load error");
-};
+        progress(0);
+    };
+
+    video.oncanplay = function(){
+        status("▶️ Video play करने के लिए तैयार है");
+    };
+
+    video.onerror = function(){
+
+        console.error("Video error:", video.error);
+
+        status("❌ Video load नहीं हो पाया");
+
+    };
+
+    video.load();
 
 });
+
+
 
 /* MUSIC */
 
