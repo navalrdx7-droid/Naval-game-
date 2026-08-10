@@ -107,14 +107,23 @@ canvas{display:none}
 <label>📝 Caption</label>
 <input type="text" id="videoText" placeholder="NAVAL GAMING 🔥">
 </div>
-
 <div class="card">
 <label>🎬 Pro Gaming Effects</label>
+
+<label>🎨 AI Effect</label>
+<select id="filter">
+  <option value="none">Normal</option>
+  <option value="contrast(1.6) saturate(1.8) brightness(1.08)">🔥 Fire Boost</option>
+  <option value="contrast(1.45) saturate(1.9) brightness(1.05)">💎 HDR Pop</option>
+  <option value="contrast(1.35) saturate(1.4)">⚡ Gaming Cinematic</option>
+  <option value="contrast(1.4) saturate(1.7) hue-rotate(25deg)">🌌 Cyberpunk</option>
+  <option value="contrast(1.5) brightness(.85) saturate(1.25)">🌑 Dark Gaming</option>
+</select>
+
 <label><input type="checkbox" id="autoZoom" checked> 🎯 Auto Zoom</label>
 <label><input type="checkbox" id="shakeEffect" checked> 💥 Shake Effect</label>
 <label><input type="checkbox" id="flashEffect" checked> ⚡ Flash Effect</label>
 </div>
-
 <div class="card">
 
 <button class="ai" id="aiButton" onclick="runRealAI()">
