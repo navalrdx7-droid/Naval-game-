@@ -2253,43 +2253,51 @@ recorder.stop();
 
 function downloadEditedVideo(){
 
-if(!editedBlob){
+  if(!editedBlob){
+    alert("पहले video create करो");
+    return;
+  }
 
-alert(
-"पहले video create करो"
-);
+  try{
 
-return;
+    const fileName = "NAVAL_AI_EDIT.webm";
 
-}
+    // Download के लिए temporary link
+    const link = document.createElement("a");
 
-const url=
-editedURL||
-URL.createObjectURL(
-editedBlob
-);
+    const downloadURL =
+      URL.createObjectURL(editedBlob);
 
-const a=
-document.createElement("a");
+    link.href = downloadURL;
+    link.download = fileName;
+    link.target = "_blank";
 
-a.href=url;
+    document.body.appendChild(link);
 
-a.download=
-"NAVAL_AI_EDIT_V8.webm";
+    link.click();
 
-document
-.body
-.appendChild(a);
+    document.body.removeChild(link);
 
-a.click();
+    // थोड़ी देर बाद URL साफ करें
+    setTimeout(() => {
+      URL.revokeObjectURL(downloadURL);
+    }, 5000);
 
-a.remove();
+    status("⬇️ Download started");
 
-status(
-"⬇️ Download started"
-);
+  }catch(error){
 
-}
+    console.error("Download error:",error);
+
+    status("❌ Download नहीं हो पाया");
+
+    alert(
+      "Download शुरू नहीं हो पाया। कृपया फिर कोशिश करें।"
+    );
+
+  }
+
+  }
 
 
 /* RESET */
