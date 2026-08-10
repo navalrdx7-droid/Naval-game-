@@ -656,18 +656,22 @@ let editedURL="";
 /* INTRO */
 
 window.addEventListener("load",()=>{
-
-setTimeout(()=>{
+window.addEventListener("load",()=>{
 
 const intro=document.getElementById("intro");
 
+setTimeout(()=>{
+
 intro.style.opacity="0";
+intro.style.pointerEvents="none";
 
 setTimeout(()=>{
-intro.style.display="none";
-},700);
 
-},1900);
+intro.style.display="none";
+
+},300);
+
+},700);
 
 });
 
