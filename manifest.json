@@ -1,0 +1,13 @@
+{
+  "name": "NAVAL AI VIDEO EDITOR",
+  "short_name": "NAVAL AI",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "description": "AI-powered video editor for creating and editing videos with filters, effects, captions and music.",
+  "orientation": "portrait",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "icons": []
+}
