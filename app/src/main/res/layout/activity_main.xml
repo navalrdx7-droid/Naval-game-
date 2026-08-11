@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="वीडियो एडिट करने के लिए सेलेक्ट करें"
+        android:textSize="16sp"
+        android:textAlignment="center"
+        android:layout_marginBottom="24dp"/>
+
+    <Button
+        android:id="@+id/btnSelect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="गैलरी से वीडियो चुनें" />
+
+    <Button
+        android:id="@+id/btnProcess"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="5 सेकंड का ट्रिम (Cut) करें"
+        android:enabled="false"
+        android:layout_marginTop="12dp"/>
+
+</LinearLayout>
