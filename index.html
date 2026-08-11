@@ -675,7 +675,17 @@ Normal
 </button>
 
 <button
-  class="green"
+  document.getElementById("video");
+
+const music=
+document.getElementById("music");
+
+const canvas=
+document.getElementById("canvas");
+
+const ctx=
+canvas.getContext("2d");
+class="green"
   id="downloadButton"
   onclick="downloadEditedVideo()"
   disabled>
@@ -747,16 +757,6 @@ intro.style.display="none";
 /* ELEMENTS */
 
 const video=
-document.getElementById("video");
-
-const music=
-document.getElementById("music");
-
-const canvas=
-document.getElementById("canvas");
-
-const ctx=
-canvas.getContext("2d");
 
 const statusText=
 document.getElementById("status");
@@ -2250,7 +2250,6 @@ recorder.stop();
 
 
 /* DOWNLOAD */
-
 function downloadEditedVideo(){
 
   if(!editedBlob){
@@ -2261,44 +2260,34 @@ function downloadEditedVideo(){
   try{
 
     const fileName = "NAVAL_AI_EDIT.webm";
+    const downloadURL = URL.createObjectURL(editedBlob);
 
-    // Download के लिए temporary link
     const link = document.createElement("a");
-
-    const downloadURL =
-      URL.createObjectURL(editedBlob);
 
     link.href = downloadURL;
     link.download = fileName;
-    link.target = "_blank";
+    link.rel = "noopener";
+    link.style.display = "none";
 
     document.body.appendChild(link);
-
     link.click();
 
-    document.body.removeChild(link);
-
-    // थोड़ी देर बाद URL साफ करें
     setTimeout(() => {
+      link.remove();
       URL.revokeObjectURL(downloadURL);
-    }, 5000);
+    }, 1000);
 
     status("⬇️ Download started");
 
   }catch(error){
 
-    console.error("Download error:",error);
+    console.error("Download error:", error);
 
     status("❌ Download नहीं हो पाया");
 
-    alert(
-      "Download शुरू नहीं हो पाया। कृपया फिर कोशिश करें।"
-    );
-
+    alert("Download शुरू नहीं हो पाया। कृपया फिर कोशिश करें।");
   }
-
   }
-
 
 /* RESET */
 
