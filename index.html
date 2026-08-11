@@ -734,37 +734,79 @@ Video select करो
 
 /* INTRO */
 
-window.addEventListener("load",function(){
+function hideIntro(){
 
-setTimeout(function(){
+  const intro =
+    document.getElementById("intro");
 
-const intro=
-document.getElementById("intro");
+  if(!intro){
+    return;
+  }
 
-intro.style.opacity="0";
+  intro.style.opacity = "0";
+  intro.style.pointerEvents = "none";
 
-setTimeout(function(){
+  setTimeout(function(){
 
-intro.style.display="none";
+    intro.style.display = "none";
 
-},700);
+  },700);
 
-},1900);
+}
 
-});
+if(document.readyState === "loading"){
 
+  document.addEventListener(
+    "DOMContentLoaded",
+    function(){
 
+      setTimeout(
+        hideIntro,
+        1900
+      );
+
+    }
+  );
+
+}else{
+
+  setTimeout(
+    hideIntro,
+    1900
+  );
+
+}
+
+window.addEventListener(
+  "load",
+  function(){
+
+    setTimeout(
+      hideIntro,
+      1900
+    );
+
+  }
+);
 /* ELEMENTS */
 
-const video=
+const video =
+document.getElementById("video");
 
-const statusText=
+const music =
+document.getElementById("music");
+
+const canvas =
+document.getElementById("canvas");
+
+const ctx =
+canvas.getContext("2d");
+
+const statusText =
 document.getElementById("status");
 
-const progressBar=
+const progressBar =
 document.getElementById("progressBar");
-
-
 /* VARIABLES */
 
 let videoURL="";
@@ -2250,45 +2292,159 @@ recorder.stop();
 
 
 /* DOWNLOAD */
-function downloadEditedVideo(){
+function downloadEditedVideo()
+{
 
   if(!editedBlob){
-    alert("पहले video create करो");
+
+    alert(
+      "पहले video create करो"
+    );
+
     return;
   }
 
+  const fileName =
+    "NAVAL_AI_EDIT.webm";
+
   try{
 
-    const fileName = "NAVAL_AI_EDIT.webm";
-    const downloadURL = URL.createObjectURL(editedBlob);
+    const file =
+      new File(
+        [editedBlob],
+        fileName,
+        {
+          type:
+            editedBlob.type ||
+            "video/webm"
+        }
+      );
 
-    const link = document.createElement("a");
+    /*
+      Android/WebView में
+      पहले Share / Save खोलने की कोशिश
+    */
 
-    link.href = downloadURL;
-    link.download = fileName;
-    link.rel = "noopener";
-    link.style.display = "none";
+    if(
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare({
+        files:[file]
+      })
+    ){
 
-    document.body.appendChild(link);
-    link.click();
+      navigator.share({
 
-    setTimeout(() => {
-      link.remove();
-      URL.revokeObjectURL(downloadURL);
-    }, 1000);
+        title:
+          "NAVAL AI EDITED VIDEO",
 
-    status("⬇️ Download started");
+        text:
+          "NAVAL AI VIDEO EDITOR",
+
+        files:[file]
+
+      })
+      .then(function(){
+
+        status(
+          "✅ Video share/save किया गया"
+        );
+
+      })
+      .catch(function(error){
+
+        console.log(
+          "Share error:",
+          error
+        );
+
+        browserDownload();
+
+      });
+
+      return;
+    }
+
+    browserDownload();
 
   }catch(error){
 
-    console.error("Download error:", error);
+    console.error(
+      "Download error:",
+      error
+    );
 
-    status("❌ Download नहीं हो पाया");
+    browserDownload();
 
-    alert("Download शुरू नहीं हो पाया। कृपया फिर कोशिश करें।");
   }
+
+}
+
+
+function browserDownload(){
+
+  try{
+
+    const url =
+      URL.createObjectURL(
+        editedBlob
+      );
+
+    const link =
+      document.createElement("a");
+
+    link.href = url;
+
+    link.download =
+      "NAVAL_AI_EDIT.webm";
+
+    link.rel =
+      "noopener";
+
+    link.style.display =
+      "none";
+
+    document.body.appendChild(
+      link
+    );
+
+    link.click();
+
+    setTimeout(
+      function(){
+
+        link.remove();
+
+        URL.revokeObjectURL(
+          url
+        );
+
+      },
+      3000
+    );
+
+    status(
+      "⬇️ Download started"
+    );
+
+  }catch(error){
+
+    console.error(
+      "Browser download error:",
+      error
+    );
+
+    status(
+      "❌ Download नहीं हो पाया"
+    );
+
+    alert(
+      "इस APK/WebView में video save support नहीं है। Share/Save विकल्प उपलब्ध हो तो उसका उपयोग करें।"
+    );
+
   }
 
+  }
 /* RESET */
 
 function resetEditor(){
