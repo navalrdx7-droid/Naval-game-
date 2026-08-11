@@ -2292,7 +2292,8 @@ recorder.stop();
 
 
 /* DOWNLOAD */
-function downloadEditedVideo(){
+
+async function downloadEditedVideo(){
 
   if(!editedBlob){
 
@@ -2307,33 +2308,88 @@ function downloadEditedVideo(){
   button.disabled = true;
 
   progress(0);
-  status("⬇️ Download preparing... 0%");
+  status("⬇️ Video तैयार हो रहा है... 0%");
 
-  let percent = 0;
+  try{
 
-  const timer = setInterval(function(){
+    /*
+      APK/WebView और Browser दोनों के लिए
+      पहले Share API try करेंगे
+    */
 
-    percent += 5;
+    const fileName =
+      "NAVAL_AI_EDIT.webm";
 
-    if(percent >= 90){
+    const file =
+      new File(
+        [editedBlob],
+        fileName,
+        {
+          type:
+            editedBlob.type ||
+            "video/webm"
+        }
+      );
 
-      percent = 90;
+    progress(30);
+    status("⬇️ Download preparing... 30%");
 
-      clearInterval(timer);
+    /*
+      Android Share / Save
+    */
+
+    if(
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare({
+        files:[file]
+      })
+    ){
+
+      progress(50);
+      status("📤 Share / Save खोल रहे हैं... 50%");
+
+      try{
+
+        await navigator.share({
+
+          title:
+            "NAVAL AI EDITED VIDEO",
+
+          text:
+            "NAVAL AI VIDEO EDITOR",
+
+          files:[file]
+
+        });
+
+        progress(100);
+
+        status(
+          "✅ Video Share / Save हो गया"
+        );
+
+        button.disabled = false;
+
+        return;
+
+      }catch(shareError){
+
+        console.log(
+          "Share unavailable:",
+          shareError
+        );
+
+      }
 
     }
 
-    progress(percent);
+    /*
+      Browser fallback
+    */
 
-    status(
-      "⬇️ Download preparing... " +
-      percent +
-      "%"
-    );
-
-  },100);
-
-  try{
+    progress(70);
+    status("⬇️ Download शुरू हो रहा है... 70%");
 
     const url =
       URL.createObjectURL(editedBlob);
@@ -2344,51 +2400,54 @@ function downloadEditedVideo(){
     link.href = url;
 
     link.download =
-      "NAVAL_AI_EDIT.webm";
+      fileName;
 
-    link.style.display = "none";
+    link.style.display =
+      "none";
 
     document.body.appendChild(link);
 
+    link.click();
+
+    progress(100);
+
+    status(
+      "✅ Download started — 100%"
+    );
+
     setTimeout(function(){
 
-      link.click();
+      link.remove();
 
-      setTimeout(function(){
+      URL.revokeObjectURL(url);
 
-        percent = 100;
+      button.disabled = false;
 
-        progress(100);
-
-        status(
-          "✅ Download complete — 100%"
-        );
-
-        button.disabled = false;
-
-        link.remove();
-
-        URL.revokeObjectURL(url);
-
-      },500);
-
-    },300);
+    },5000);
 
   }catch(error){
 
-    console.error(error);
-
-    clearInterval(timer);
+    console.error(
+      "Download error:",
+      error
+    );
 
     progress(0);
 
-    status("❌ Download failed");
+    status(
+      "❌ Download failed"
+    );
 
     button.disabled = false;
 
+    alert(
+      "Video save नहीं हो पाया।"
+    );
+
   }
 
   }
+
 /* RESET */
 
 function resetEditor(){
