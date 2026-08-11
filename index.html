@@ -2301,38 +2301,90 @@ function downloadEditedVideo(){
 
   }
 
+  const button =
+    document.getElementById("downloadButton");
+
+  button.disabled = true;
+
+  progress(0);
+  status("⬇️ Download preparing... 0%");
+
+  let percent = 0;
+
+  const timer = setInterval(function(){
+
+    percent += 5;
+
+    if(percent >= 90){
+
+      percent = 90;
+
+      clearInterval(timer);
+
+    }
+
+    progress(percent);
+
+    status(
+      "⬇️ Download preparing... " +
+      percent +
+      "%"
+    );
+
+  },100);
+
   try{
 
-    const fileName = "NAVAL_AI_EDIT.webm";
+    const url =
+      URL.createObjectURL(editedBlob);
 
-    const url = URL.createObjectURL(editedBlob);
-
-    const link = document.createElement("a");
+    const link =
+      document.createElement("a");
 
     link.href = url;
-    link.download = fileName;
-    link.target = "_blank";
+
+    link.download =
+      "NAVAL_AI_EDIT.webm";
+
+    link.style.display = "none";
 
     document.body.appendChild(link);
 
-    link.click();
-
     setTimeout(function(){
 
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      link.click();
 
-    },10000);
+      setTimeout(function(){
 
-    status("⬇️ Download started");
+        percent = 100;
+
+        progress(100);
+
+        status(
+          "✅ Download complete — 100%"
+        );
+
+        button.disabled = false;
+
+        link.remove();
+
+        URL.revokeObjectURL(url);
+
+      },500);
+
+    },300);
 
   }catch(error){
 
     console.error(error);
 
+    clearInterval(timer);
+
+    progress(0);
+
     status("❌ Download failed");
 
-    alert("Download शुरू नहीं हो पाया");
+    button.disabled = false;
 
   }
 
