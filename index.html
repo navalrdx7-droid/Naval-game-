@@ -2292,155 +2292,47 @@ recorder.stop();
 
 
 /* DOWNLOAD */
-function downloadEditedVideo()
-{
+function downloadEditedVideo(){
 
   if(!editedBlob){
 
-    alert(
-      "पहले video create करो"
-    );
-
+    alert("पहले video create करो");
     return;
-  }
-
-  const fileName =
-    "NAVAL_AI_EDIT.webm";
-
-  try{
-
-    const file =
-      new File(
-        [editedBlob],
-        fileName,
-        {
-          type:
-            editedBlob.type ||
-            "video/webm"
-        }
-      );
-
-    /*
-      Android/WebView में
-      पहले Share / Save खोलने की कोशिश
-    */
-
-    if(
-      navigator.share &&
-      navigator.canShare &&
-      navigator.canShare({
-        files:[file]
-      })
-    ){
-
-      navigator.share({
-
-        title:
-          "NAVAL AI EDITED VIDEO",
-
-        text:
-          "NAVAL AI VIDEO EDITOR",
-
-        files:[file]
-
-      })
-      .then(function(){
-
-        status(
-          "✅ Video share/save किया गया"
-        );
-
-      })
-      .catch(function(error){
-
-        console.log(
-          "Share error:",
-          error
-        );
-
-        browserDownload();
-
-      });
-
-      return;
-    }
-
-    browserDownload();
-
-  }catch(error){
-
-    console.error(
-      "Download error:",
-      error
-    );
-
-    browserDownload();
 
   }
 
-}
-
-
-function browserDownload(){
-
   try{
 
-    const url =
-      URL.createObjectURL(
-        editedBlob
-      );
+    const fileName = "NAVAL_AI_EDIT.webm";
 
-    const link =
-      document.createElement("a");
+    const url = URL.createObjectURL(editedBlob);
+
+    const link = document.createElement("a");
 
     link.href = url;
+    link.download = fileName;
+    link.target = "_blank";
 
-    link.download =
-      "NAVAL_AI_EDIT.webm";
-
-    link.rel =
-      "noopener";
-
-    link.style.display =
-      "none";
-
-    document.body.appendChild(
-      link
-    );
+    document.body.appendChild(link);
 
     link.click();
 
-    setTimeout(
-      function(){
+    setTimeout(function(){
 
-        link.remove();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
-        URL.revokeObjectURL(
-          url
-        );
+    },10000);
 
-      },
-      3000
-    );
-
-    status(
-      "⬇️ Download started"
-    );
+    status("⬇️ Download started");
 
   }catch(error){
 
-    console.error(
-      "Browser download error:",
-      error
-    );
+    console.error(error);
 
-    status(
-      "❌ Download नहीं हो पाया"
-    );
+    status("❌ Download failed");
 
-    alert(
-      "इस APK/WebView में video save support नहीं है। Share/Save विकल्प उपलब्ध हो तो उसका उपयोग करें।"
-    );
+    alert("Download शुरू नहीं हो पाया");
 
   }
 
