@@ -417,40 +417,67 @@ canvas{
 
 </div>
 
-<!-- TRIM -->
+<!-- TRIM + SPLIT -->
+
 <div class="card">
 
-<div class="title">✂️ Video Trim</div>
+  <div class="title">
+    ✂️ Video Trim & Split
+  </div>
 
-<label>Start Time</label>
+  <label>
+    Start Time
+  </label>
 
-<input
-  type="number"
-  id="start"
-  value="0"
-  min="0"
-  step="0.1">
+  <input
+    type="number"
+    id="start"
+    value="0"
+    min="0"
+    step="0.1">
 
-<label>End Time</label>
+  <label>
+    End Time
+  </label>
 
-<input
-  type="number"
-  id="end"
-  value="0"
-  min="0"
-  step="0.1">
+  <input
+    type="number"
+    id="end"
+    value="0"
+    min="0"
+    step="0.1">
 
-<div class="row">
+  <div class="row">
 
-<button onclick="setStart()">
-SET START
-</button>
+    <button onclick="setStart()">
+      ⏺️ SET START
+    </button>
 
-<button onclick="setEnd()">
-SET END
-</button>
+    <button onclick="setEnd()">
+      ⏺️ SET END
+    </button>
 
-</div>
+  </div>
+
+  <label>
+    ✂️ Split Point
+  </label>
+
+  <input
+    type="number"
+    id="splitPoint"
+    value="0"
+    min="0"
+    step="0.1">
+
+  <button onclick="splitVideo()">
+    ✂️ SPLIT VIDEO
+  </button>
+
+  <div
+    id="splitResult"
+    class="result">
+  </div>
 
 </div>
 
@@ -1137,26 +1164,68 @@ status("✂️ Start set");
 }
 
 
-function setEnd(){
+/* SPLIT VIDEO */
 
-if(!videoReady){
+function splitVideo(){
 
-alert(
-"पहले video select करो"
-);
+  if(!videoReady){
 
-return;
+    alert("पहले video select करो");
 
-}
+    return;
 
-document
-.getElementById("end")
-.value=
-video.currentTime.toFixed(1);
+  }
 
-status("✂️ End set");
+  const point =
+    Number(
+      document.getElementById("splitPoint").value
+    );
 
-}
+  const duration =
+    video.duration;
+
+  if(point <= 0 || point >= duration){
+
+    alert(
+      "Split point video के बीच में होना चाहिए"
+    );
+
+    return;
+
+  }
+
+  document
+    .getElementById("start")
+    .value = 0;
+
+  document
+    .getElementById("end")
+    .value =
+      point.toFixed(1);
+
+  const result =
+    document.getElementById("splitResult");
+
+  result.style.display = "block";
+
+  result.innerHTML =
+    "✂️ <b>Video Split Ready</b><br><br>" +
+
+    "🎬 Part 1: 0s → " +
+    point.toFixed(1) +
+    "s<br><br>" +
+
+    "🎬 Part 2: " +
+    point.toFixed(1) +
+    "s → " +
+    duration.toFixed(1) +
+    "s";
+
+  status(
+    "✂️ Video split — Part 1 selected"
+  );
+
+  }
 
 
 /* AI */
