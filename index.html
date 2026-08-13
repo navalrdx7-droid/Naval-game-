@@ -27,10 +27,8 @@ button{border:0;color:var(--text);cursor:pointer}
 .empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);gap:12px;text-align:center;padding:25px}
 .empty .big{font-size:42px}
 .loadBtn{background:#242429;padding:11px 16px;border-radius:12px;color:white;font-weight:700}
-.previewControls{position:absolute;left:0;right:0;bottom:0;height:86px;padding:20px 10px 12px;display:flex;justify-content:center;align-items:flex-end;background:linear-gradient(transparent,rgba(0,0,0,.78));z-index:12}
-.play{width:56px;height:56px;min-width:56px;border-radius:50%;background:#fff;color:#111;font-size:22px;display:grid;place-items:center;box-shadow:0 3px 18px rgba(0,0,0,.55);font-weight:900}
-.play:active{transform:scale(.94)}
-.play:focus{outline:2px solid var(--accent);outline-offset:2px}
+.previewControls{position:absolute;left:0;right:0;bottom:0;padding:35px 10px 10px;display:flex;justify-content:center;background:linear-gradient(transparent,rgba(0,0,0,.72))}
+.play{width:48px;height:48px;border-radius:50%;background:#fff;color:#111;font-size:20px}
 .sideTools{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:8px}
 .sideTools button{width:40px;height:40px;border-radius:12px;background:rgba(25,25,29,.9);font-size:18px}
 .timeRow{height:32px;padding:0 14px;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}
@@ -203,17 +201,10 @@ video.ontimeupdate=()=>{
   const p=video.duration?(video.currentTime/video.duration)*100:0;
   $("playhead").style.left=`calc(${p}% + 0px)`;
 };
-$("playBtn").onclick=(e)=>{
-  e.stopPropagation();
-  if(!videoURL){input.click();return}
+$("playBtn").onclick=()=>{
   if(video.paused){video.play();$("playBtn").textContent="❚❚"}
   else{video.pause();$("playBtn").textContent="▶"}
 };
-video.addEventListener("click",()=>{
-  if(!videoURL)return;
-  if(video.paused){video.play();$("playBtn").textContent="❚❚"}
-  else{video.pause();$("playBtn").textContent="▶"}
-});
 video.onended=()=>{$("playBtn").textContent="▶"};
 
 $("muteBtn").onclick=()=>{
@@ -240,9 +231,9 @@ function openSheet(type){
     },
     audio:{
       title:"🎵 Audio",
-      html:`<button class="loadBtn" onclick="$('audioInput').click()">＋ Add Audio / Music</button>
-      <div class="rangeRow">Volume <input type="range" min="0" max="100" value="100"></div>
-      <p style="color:#999;font-size:12px">Voiceover aur background music tracks yahan add honge.</p>`
+      html:`<button class="loadBtn" id="addAudioBtn">＋ Add Audio / Music</button>
+      <div class="rangeRow">Volume <input id="audioVolume" type="range" min="0" max="100" value="100"></div>
+      <p id="audioStatus" style="color:#999;font-size:12px">Voiceover aur background music track add karo.</p>`
     },
     text:{
       title:"T Text",
@@ -272,6 +263,10 @@ function openSheet(type){
   $("sheetTitle").textContent=data[type].title;
   $("sheetContent").innerHTML=data[type].html;
   $("sheet").classList.add("open");
+  if(type==="audio") {
+    const add=document.getElementById("addAudioBtn");
+    if(add) add.addEventListener("click",chooseAudio,{once:true});
+  }
 }
 document.querySelectorAll(".tool[data-sheet]").forEach(btn=>{
   btn.onclick=()=>{
@@ -285,12 +280,18 @@ function setSpeed(s){video.playbackRate=s}
 function setEffect(e){video.style.filter=e}
 function filterVideo(){}
 
-audioInput.onchange=e=>{
-  const file=e.target.files[0];if(!file)return;
+function chooseAudio(){
+  audioInput.value="";
+  audioInput.click();
+}
+audioInput.addEventListener("change",e=>{
+  const file=e.target.files && e.target.files[0];
+  if(!file)return;
   if(audioURL)URL.revokeObjectURL(audioURL);
   audioURL=URL.createObjectURL(file);
-  alert("Audio added: "+file.name);
-};
+  const status=document.getElementById("audioStatus");
+  if(status) status.textContent="🎵 Selected: "+file.name;
+});
 
 function runAI(){
   if(!videoURL){alert("Pehle video select karo.");return}
@@ -304,126 +305,65 @@ function runAI(){
 }
 $("aiBtn").onclick=runAI;$("aiAuto").onclick=runAI;$("aiTool").onclick=runAI;
 
-async function exportRealVideo(){
+async function exportEditedVideo(){
   if(!videoURL){alert("Pehle video select karo.");return}
-  if(typeof MediaRecorder==="undefined" || !HTMLCanvasElement.prototype.captureStream){
-    alert("Is browser me video export support nahi hai. Chrome/Android ke latest version me try karo.");
+  if(!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream){
+    alert("Is browser/app WebView me direct video export supported nahi hai. Latest Chrome/WebView use karo.");
     return;
   }
-
-  const btn=$("exportBtn");
-  btn.disabled=true;
-  btn.textContent="Exporting…";
-  $("exportModal").classList.add("show");
-  $("exportStatus").textContent="Video render ho raha hai…";
-  $("exportProgress").style.width="0%";
-  $("exportPercent").textContent="0%";
-
-  const wasPlaying=!video.paused;
-  const oldTime=video.currentTime;
-  const canvas=document.createElement("canvas");
-  const vw=video.videoWidth||720, vh=video.videoHeight||1280;
-  const maxW=720;
-  const scale=Math.min(1,maxW/vw);
-  canvas.width=Math.max(2,Math.round(vw*scale));
-  canvas.height=Math.max(2,Math.round(vh*scale));
-  const ctx=canvas.getContext("2d");
-
-  const draw=()=>{
-    if(video.readyState>=2){
-      ctx.save();
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.filter=video.style.filter && video.style.filter!=="none" ? video.style.filter : "none";
-      const zoom=parseFloat((video.style.transform.match(/scale\\(([^)]+)\\)/)||[])[1]||"1");
-      ctx.translate(canvas.width/2,canvas.height/2);
-      ctx.scale(zoom,zoom);
-      ctx.drawImage(video,-canvas.width/2,-canvas.height/2,canvas.width,canvas.height);
-      ctx.restore();
-    }
-  };
-
-  const stream=canvas.captureStream(30);
-
-  // Keep the source video's audio when the browser allows captureStream().
+  const modal=$("exportModal"),bar=$("exportProgress"),pct=$("exportPercent"),status=$("exportStatus");
+  modal.classList.add("show"); bar.style.width="0%"; pct.textContent="0%"; status.textContent="Preparing video...";
+  let audioCtx=null, raf=0, recorder=null, music=null;
   try{
-    if(typeof video.captureStream==="function"){
-      const sourceStream=video.captureStream();
-      sourceStream.getAudioTracks().forEach(t=>stream.addTrack(t));
+    video.pause(); video.currentTime=0;
+    await new Promise(r=>{if(video.readyState>=2)r();else video.onloadeddata=()=>r();});
+    const maxWidth=720, scale=Math.min(1,maxWidth/(video.videoWidth||720));
+    const canvas=document.createElement("canvas");
+    canvas.width=Math.max(2,Math.round((video.videoWidth||720)*scale));
+    canvas.height=Math.max(2,Math.round((video.videoHeight||1280)*scale));
+    const ctx=canvas.getContext("2d"), out=canvas.captureStream(30);
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    const dest=audioCtx.createMediaStreamDestination();
+    const videoSource=audioCtx.createMediaElementSource(video);
+    videoSource.connect(dest);
+    if(audioURL){
+      music=new Audio(); music.src=audioURL; music.preload="auto"; music.loop=true;
+      await new Promise((resolve,reject)=>{music.oncanplay=resolve;music.onerror=()=>reject(new Error("Audio load failed"));});
+      const ms=audioCtx.createMediaElementSource(music), gain=audioCtx.createGain();
+      gain.gain.value=(document.getElementById("audioVolume")?.value||100)/100;
+      ms.connect(gain); gain.connect(dest); await music.play();
     }
-  }catch(e){ console.warn("Audio capture unavailable",e); }
-
-  const mimeCandidates=[
-    "video/webm;codecs=vp9,opus",
-    "video/webm;codecs=vp8,opus",
-    "video/webm"
-  ];
-  const mime=mimeCandidates.find(x=>MediaRecorder.isTypeSupported(x))||"";
-  const recorder=new MediaRecorder(stream,mime?{mimeType:mime}:{});
-  const chunks=[];
-  recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
-  recorder.onerror=()=>{
-    $("exportModal").classList.remove("show");
-    btn.disabled=false;btn.textContent="Export";
-    alert("Export ke dauran error aaya. Video ko dobara load karke try karo.");
-  };
-
-  let raf;
-  const drawLoop=()=>{
-    draw();
-    const duration=video.duration||1;
-    const percent=Math.min(99,Math.round(video.currentTime/duration*100));
-    $("exportProgress").style.width=percent+"%";
-    $("exportPercent").textContent=percent+"%";
-    raf=requestAnimationFrame(drawLoop);
-  };
-
-  recorder.onstop=()=>{
-    cancelAnimationFrame(raf);
-    draw();
-    const blob=new Blob(chunks,{type:mime||"video/webm"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url;
-    a.download="NAVAL_AI_EDITED_"+Date.now()+".webm";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),3000);
-
-    $("exportProgress").style.width="100%";
-    $("exportPercent").textContent="100%";
-    $("exportStatus").textContent="Export complete ✓";
-    setTimeout(()=>{
-      $("exportModal").classList.remove("show");
-      btn.disabled=false;btn.textContent="Export";
-      if(!wasPlaying){
-        video.pause();
-        video.currentTime=oldTime;
-      }
-    },700);
-  };
-
-  video.currentTime=0;
-  await new Promise(resolve=>{
-    if(video.readyState>=2) resolve();
-    else video.onloadeddata=resolve;
-  });
-
-  draw();
-  recorder.start(250);
-  drawLoop();
-  try{await video.play()}catch(e){}
-
-  const finish=()=>{
-    video.pause();
-    if(recorder.state!=="inactive") recorder.stop();
-    video.removeEventListener("ended",finish);
-  };
-  video.addEventListener("ended",finish,{once:true});
+    dest.stream.getAudioTracks().forEach(t=>out.addTrack(t));
+    const mime=["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"].find(x=>MediaRecorder.isTypeSupported(x));
+    if(!mime)throw new Error("WebM codec unavailable");
+    const chunks=[];
+    recorder=new MediaRecorder(out,{mimeType:mime,videoBitsPerSecond:3500000});
+    recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)};
+    const draw=()=>{
+      ctx.fillStyle="#000";ctx.fillRect(0,0,canvas.width,canvas.height);
+      const vw=video.videoWidth||canvas.width,vh=video.videoHeight||canvas.height,sc=Math.min(canvas.width/vw,canvas.height/vh),dw=vw*sc,dh=vh*sc;
+      ctx.drawImage(video,(canvas.width-dw)/2,(canvas.height-dh)/2,dw,dh);
+      if(!video.ended)raf=requestAnimationFrame(draw);
+    };
+    recorder.start(250); draw(); await video.play();
+    await new Promise(resolve=>{
+      const timer=setInterval(()=>{
+        const p=video.duration?Math.min(100,video.currentTime/video.duration*100):0;
+        bar.style.width=p+"%";pct.textContent=Math.round(p)+"%";status.textContent="Rendering edited video...";
+        if(video.ended){clearInterval(timer);resolve();}
+      },100);
+    });
+    cancelAnimationFrame(raf);video.pause();if(music)music.pause();
+    await new Promise(resolve=>{recorder.addEventListener("stop",resolve,{once:true});recorder.stop();});
+    const blob=new Blob(chunks,{type:mime}),url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download="NAVAL_AI_EDITED_VIDEO.webm";a.style.display="none";document.body.appendChild(a);a.click();a.remove();
+    bar.style.width="100%";pct.textContent="100%";status.textContent="Export complete!";
+    setTimeout(()=>{modal.classList.remove("show");URL.revokeObjectURL(url)},800);
+  }catch(err){console.error(err);modal.classList.remove("show");alert("Export failed: "+(err.message||"Unknown error"));}
+  finally{try{if(audioCtx)await audioCtx.close()}catch(e){}}
 }
-
-$("exportBtn").onclick=exportRealVideo;
+$("exportBtn").onclick=exportEditedVideo;
 </script>
 </body>
-            </html>
+  </html>
   
