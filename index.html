@@ -44,7 +44,7 @@ button{border:0;color:var(--text);cursor:pointer}
 .thumbs img{height:100%;width:80px;object-fit:cover;flex:none}
 .wave{height:100%;display:flex;align-items:center;gap:2px;padding:0 8px}
 .wave i{display:block;width:3px;border-radius:3px;background:#28d6e4}
-.playhead{position:absolute;top:0;bottom:0;width:2px;background:#fff;left:35%;z-index:8;box-shadow:0 0 5px #fff}
+.playhead{position:absolute;top:0;bottom:0;width:2px;background:#fff;left:0%;z-index:8;box-shadow:0 0 5px #fff}
 .playhead:before{content:"";position:absolute;top:-1px;left:-5px;width:12px;height:12px;border-radius:50%;background:#fff}
 .toolPanel{height:78px;border-top:1px solid var(--line);background:#0d0d10;display:flex;align-items:center;overflow-x:auto;padding:7px 8px;gap:8px;scrollbar-width:none}
 .toolPanel::-webkit-scrollbar{display:none}
@@ -91,6 +91,7 @@ input[type=range]{accent-color:var(--accent)}
           <button class="loadBtn" id="pickVideo">＋ Add Video</button>
         </div>
         <video id="videoPreview" playsinline></video>
+        <audio id="bgAudio" style="display:none"></audio>
         <div class="sideTools">
           <button id="fitBtn">⛶</button>
           <button id="muteBtn">🔊</button>
@@ -147,7 +148,7 @@ input[type=range]{accent-color:var(--accent)}
 
 <script>
 const $=id=>document.getElementById(id);
-const video=$("videoPreview"), input=$("videoInput"), audioInput=$("audioInput");
+const video=$("videoPreview"), audio=$("bgAudio"), input=$("videoInput"), audioInput=$("audioInput");
 let videoURL=null, audioURL=null, muted=false;
 
 function fmt(sec){
@@ -201,20 +202,37 @@ video.ontimeupdate=()=>{
   const p=video.duration?(video.currentTime/video.duration)*100:0;
   $("playhead").style.left=`calc(${p}% + 0px)`;
 };
-$("playBtn").onclick=()=>{
-  if(video.paused){video.play();$("playBtn").textContent="❚❚"}
-  else{video.pause();$("playBtn").textContent="▶"}
+
+$("playBtn").onclick=async ()=>{
+  if(video.paused){
+    await video.play();
+    if(audioURL) {
+      audio.currentTime = video.currentTime;
+      audio.play();
+    }
+    $("playBtn").textContent="❚❚";
+  } else {
+    video.pause();
+    if(audioURL) audio.pause();
+    $("playBtn").textContent="▶";
+  }
 };
-video.onended=()=>{$("playBtn").textContent="▶"};
+video.onended=()=>{
+  $("playBtn").textContent="▶";
+  if(audioURL) audio.pause();
+};
 
 $("muteBtn").onclick=()=>{
-  muted=!muted;video.muted=muted;$("muteBtn").textContent=muted?"🔇":"🔊";
+  muted=!muted;
+  video.muted=muted;
+  audio.muted=muted;
+  $("muteBtn").textContent=muted?"🔇":"🔊";
 };
 $("fitBtn").onclick=()=>{
   if(video.requestFullscreen) video.requestFullscreen();
 };
 
-$("backBtn").onclick=()=>alert("Back button ready — yahan apna app navigation connect kar sakte ho.");
+$("backBtn").onclick=()=>alert("Back button ready.");
 
 function openSheet(type){
   const data={
@@ -225,39 +243,32 @@ function openSheet(type){
         <button class="option" onclick="alert('Split mode')"><b>🔪</b>Split</button>
         <button class="option" onclick="setSpeed(.5)"><b>🐢</b>0.5×</button>
         <button class="option" onclick="setSpeed(2)"><b>⚡</b>2×</button>
-      </div>
-      <div class="rangeRow">Brightness <input type="range" min="-100" max="100" value="0" oninput="filterVideo()"></div>
-      <div class="rangeRow">Zoom <input type="range" min="100" max="150" value="100" oninput="video.style.transform='scale('+this.value/100+')'"></div>`
+      </div>`
     },
     audio:{
       title:"🎵 Audio",
       html:`<button class="loadBtn" id="addAudioBtn">＋ Add Audio / Music</button>
-      <div class="rangeRow">Volume <input id="audioVolume" type="range" min="0" max="100" value="100"></div>
+      <div class="rangeRow">Volume <input id="audioVolume" type="range" min="0" max="100" value="100" oninput="if(audio)audio.volume=this.value/100"></div>
       <p id="audioStatus" style="color:#999;font-size:12px">Voiceover aur background music track add karo.</p>`
     },
     text:{
       title:"T Text",
-      html:`<input id="captionText" placeholder="Type your text..." style="width:100%;padding:13px;border-radius:12px;border:1px solid #333;background:#24242a;color:white">
-      <div class="grid" style="margin-top:10px"><button class="option"><b>⬅️</b>Left</button><button class="option"><b>↔️</b>Center</button><button class="option"><b>➡️</b>Right</button><button class="option"><b>🔤</b>Font</button></div>`
+      html:`<input id="captionText" placeholder="Type your text..." style="width:100%;padding:13px;border-radius:12px;border:1px solid #333;background:#24242a;color:white">`
     },
     effects:{
       title:"✨ Effects",
       html:`<div class="grid">
       <button class="option" onclick="setEffect('contrast(1.25) saturate(1.3)')"><b>🔥</b>Fire Boost</button>
-      <button class="option" onclick="setEffect('contrast(1.2) saturate(1.15)')"><b>🌈</b>HDR Pop</button>
-      <button class="option" onclick="setEffect('contrast(1.2) brightness(.85)')"><b>🎮</b>Gaming</button>
-      <button class="option" onclick="setEffect('hue-rotate(30deg) saturate(1.5)')"><b>💜</b>Cyber</button>
-      </div>
-      <div class="grid" style="margin-top:10px"><button class="option" onclick="alert('Auto Zoom enabled')"><b>🔍</b>Auto Zoom</button><button class="option" onclick="alert('Shake enabled')"><b>💥</b>Shake</button><button class="option"><b>⚡</b>Flash</button><button class="option" onclick="setEffect('none')"><b>↩️</b>Reset</button></div>`
+      <button class="option" onclick="setEffect('none')"><b>↩️</b>Reset</button>
+      </div>`
     },
     overlay:{
       title:"🖼️ Overlay",
-      html:`<div class="grid"><button class="option"><b>🖼️</b>Image</button><button class="option"><b>🎬</b>Video</button><button class="option"><b>💧</b>Watermark</button><button class="option"><b>➕</b>Add</button></div>`
+      html:`<div class="grid"><button class="option"><b>🖼️</b>Image</button></div>`
     },
     captions:{
       title:"📝 Captions",
-      html:`<div class="grid"><button class="option"><b>🤖</b>Auto Captions</button><button class="option"><b>🌐</b>Language</button><button class="option"><b>🎨</b>Style</button><button class="option"><b>📍</b>Position</button></div>
-      <p style="color:#999;font-size:12px">AI captions ko baad mein speech-to-text API se connect kiya ja sakta hai.</p>`
+      html:`<div class="grid"><button class="option"><b>🤖</b>Auto Captions</button></div>`
     }
   };
   $("sheetTitle").textContent=data[type].title;
@@ -265,7 +276,7 @@ function openSheet(type){
   $("sheet").classList.add("open");
   if(type==="audio") {
     const add=document.getElementById("addAudioBtn");
-    if(add) add.addEventListener("click",chooseAudio,{once:true});
+    if(add) add.onclick=chooseAudio;
   }
 }
 document.querySelectorAll(".tool[data-sheet]").forEach(btn=>{
@@ -276,29 +287,28 @@ document.querySelectorAll(".tool[data-sheet]").forEach(btn=>{
 });
 $("closeSheet").onclick=()=>$("sheet").classList.remove("open");
 
-function setSpeed(s){video.playbackRate=s}
+function setSpeed(s){video.playbackRate=s; audio.playbackRate=s;}
 function setEffect(e){video.style.filter=e}
-function filterVideo(){}
 
 function chooseAudio(){
   audioInput.value="";
   audioInput.click();
 }
-audioInput.addEventListener("change",e=>{
+audioInput.onchange=e=>{
   const file=e.target.files && e.target.files[0];
   if(!file)return;
   if(audioURL)URL.revokeObjectURL(audioURL);
   audioURL=URL.createObjectURL(file);
+  audio.src=audioURL;
   const status=document.getElementById("audioStatus");
   if(status) status.textContent="🎵 Selected: "+file.name;
-});
+};
 
 function runAI(){
   if(!videoURL){alert("Pehle video select karo.");return}
   $("sheetTitle").textContent="🤖 AI Auto Edit";
   $("sheetContent").innerHTML=`<div style="text-align:center;padding:15px">
   <div style="font-size:45px">🤖</div><h3>AI editing...</h3>
-  <p style="color:#999">Best format, cuts, zoom aur effects analyze ho rahe hain.</p>
   <div class="progress"><i id="aiProgress" style="width:0"></i></div></div>`;
   $("sheet").classList.add("open");
   let n=0;const t=setInterval(()=>{n+=5;const p=$("aiProgress");if(p)p.style.width=n+"%";if(n>=100){clearInterval(t);setTimeout(()=>alert("AI Auto Edit complete!"),150)}} ,80);
@@ -307,63 +317,114 @@ $("aiBtn").onclick=runAI;$("aiAuto").onclick=runAI;$("aiTool").onclick=runAI;
 
 async function exportEditedVideo(){
   if(!videoURL){alert("Pehle video select karo.");return}
-  if(!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream){
-    alert("Is browser/app WebView me direct video export supported nahi hai. Latest Chrome/WebView use karo.");
-    return;
-  }
+  
   const modal=$("exportModal"),bar=$("exportProgress"),pct=$("exportPercent"),status=$("exportStatus");
   modal.classList.add("show"); bar.style.width="0%"; pct.textContent="0%"; status.textContent="Preparing video...";
-  let audioCtx=null, raf=0, recorder=null, music=null;
+  
+  let audioCtx=null, recorder=null, animationFrame=null;
   try{
-    video.pause(); video.currentTime=0;
+    video.pause(); 
+    if(audioURL) audio.pause();
+    video.currentTime=0;
+    
     await new Promise(r=>{if(video.readyState>=2)r();else video.onloadeddata=()=>r();});
-    const maxWidth=720, scale=Math.min(1,maxWidth/(video.videoWidth||720));
+    
     const canvas=document.createElement("canvas");
-    canvas.width=Math.max(2,Math.round((video.videoWidth||720)*scale));
-    canvas.height=Math.max(2,Math.round((video.videoHeight||1280)*scale));
-    const ctx=canvas.getContext("2d"), out=canvas.captureStream(30);
+    canvas.width=video.videoWidth || 720;
+    canvas.height=video.videoHeight || 1280;
+    const ctx=canvas.getContext("2d");
+    
+    const canvasStream=canvas.captureStream(30);
+    
     audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-    const dest=audioCtx.createMediaStreamDestination();
-    const videoSource=audioCtx.createMediaElementSource(video);
-    videoSource.connect(dest);
-    if(audioURL){
-      music=new Audio(); music.src=audioURL; music.preload="auto"; music.loop=true;
-      await new Promise((resolve,reject)=>{music.oncanplay=resolve;music.onerror=()=>reject(new Error("Audio load failed"));});
-      const ms=audioCtx.createMediaElementSource(music), gain=audioCtx.createGain();
-      gain.gain.value=(document.getElementById("audioVolume")?.value||100)/100;
-      ms.connect(gain); gain.connect(dest); await music.play();
+    if(audioCtx.state === 'suspended') {
+      await audioCtx.resume();
     }
-    dest.stream.getAudioTracks().forEach(t=>out.addTrack(t));
-    const mime=["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"].find(x=>MediaRecorder.isTypeSupported(x));
-    if(!mime)throw new Error("WebM codec unavailable");
+    const dest=audioCtx.createMediaStreamDestination();
+    
+    try {
+      const videoSource=audioCtx.createMediaElementSource(video);
+      videoSource.connect(dest);
+    } catch(e) { console.log("Video source already connected or unavailable"); }
+
+    if(audioURL){
+      try {
+        const audioSource=audioCtx.createMediaElementSource(audio);
+        const gain=audioCtx.createGain();
+        gain.gain.value=(document.getElementById("audioVolume")?.value||100)/100;
+        audioSource.connect(gain);
+        gain.connect(dest);
+      } catch(e) { console.log("Audio source error"); }
+    }
+
+    dest.stream.getAudioTracks().forEach(track=>canvasStream.addTrack(track));
+
+    const mimeTypes = [
+      "video/webm;codecs=vp9,opus",
+      "video/webm;codecs=vp8,opus",
+      "video/webm",
+      "video/mp4"
+    ];
+    const mime=mimeTypes.find(x=>MediaRecorder.isTypeSupported(x)) || "";
+    
     const chunks=[];
-    recorder=new MediaRecorder(out,{mimeType:mime,videoBitsPerSecond:3500000});
-    recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)};
-    const draw=()=>{
-      ctx.fillStyle="#000";ctx.fillRect(0,0,canvas.width,canvas.height);
-      const vw=video.videoWidth||canvas.width,vh=video.videoHeight||canvas.height,sc=Math.min(canvas.width/vw,canvas.height/vh),dw=vw*sc,dh=vh*sc;
-      ctx.drawImage(video,(canvas.width-dw)/2,(canvas.height-dh)/2,dw,dh);
-      if(!video.ended)raf=requestAnimationFrame(draw);
+    recorder=new MediaRecorder(canvasStream, mime ? {mimeType:mime} : undefined);
+    recorder.ondataavailable=e=>{if(e.data && e.data.size > 0) chunks.push(e.data);};
+    
+    recorder.start(100);
+    await video.play();
+    if(audioURL) { audio.currentTime=0; await audio.play(); }
+
+    const renderLoop = () => {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      if(!video.ended && !video.paused) {
+        animationFrame = requestAnimationFrame(renderLoop);
+      }
     };
-    recorder.start(250); draw(); await video.play();
+    renderLoop();
+
     await new Promise(resolve=>{
       const timer=setInterval(()=>{
-        const p=video.duration?Math.min(100,video.currentTime/video.duration*100):0;
-        bar.style.width=p+"%";pct.textContent=Math.round(p)+"%";status.textContent="Rendering edited video...";
-        if(video.ended){clearInterval(timer);resolve();}
+        const p=video.duration?Math.min(100,(video.currentTime/video.duration)*100):0;
+        bar.style.width=p+"%";pct.textContent=Math.round(p)+"%";status.textContent="Exporting video...";
+        if(video.ended){
+          clearInterval(timer);
+          resolve();
+        }
       },100);
     });
-    cancelAnimationFrame(raf);video.pause();if(music)music.pause();
-    await new Promise(resolve=>{recorder.addEventListener("stop",resolve,{once:true});recorder.stop();});
-    const blob=new Blob(chunks,{type:mime}),url=URL.createObjectURL(blob),a=document.createElement("a");
-    a.href=url;a.download="NAVAL_AI_EDITED_VIDEO.webm";a.style.display="none";document.body.appendChild(a);a.click();a.remove();
+
+    if(animationFrame) cancelAnimationFrame(animationFrame);
+    video.pause();
+    if(audioURL) audio.pause();
+
+    await new Promise(resolve=>{
+      recorder.onstop = resolve;
+      recorder.stop();
+    });
+
+    const blob=new Blob(chunks,{type: mime || "video/webm"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download=`EDITED_VIDEO_${Date.now()}.${mime.includes("mp4") ? "mp4" : "webm"}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
     bar.style.width="100%";pct.textContent="100%";status.textContent="Export complete!";
-    setTimeout(()=>{modal.classList.remove("show");URL.revokeObjectURL(url)},800);
-  }catch(err){console.error(err);modal.classList.remove("show");alert("Export failed: "+(err.message||"Unknown error"));}
-  finally{try{if(audioCtx)await audioCtx.close()}catch(e){}}
+    setTimeout(()=>{modal.classList.remove("show"); URL.revokeObjectURL(url);}, 1000);
+
+  }catch(err){
+    console.error(err);
+    modal.classList.remove("show");
+    alert("Export me issue aaya: "+(err.message||"Unknown error"));
+  }finally{
+    if(audioCtx) try{await audioCtx.close();}catch(e){}
+  }
 }
+
 $("exportBtn").onclick=exportEditedVideo;
 </script>
 </body>
-  </html>
-  
+</html>            
