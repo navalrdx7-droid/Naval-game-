@@ -345,7 +345,7 @@ async function exportEditedVideo(){
     try {
       const videoSource=audioCtx.createMediaElementSource(video);
       videoSource.connect(dest);
-    } catch(e) { console.log("Video source already connected or unavailable"); }
+    } catch(e) { console.log("Video audio capture error"); }
 
     if(audioURL){
       try {
@@ -354,7 +354,7 @@ async function exportEditedVideo(){
         gain.gain.value=(document.getElementById("audioVolume")?.value||100)/100;
         audioSource.connect(gain);
         gain.connect(dest);
-      } catch(e) { console.log("Audio source error"); }
+      } catch(e) { console.log("External audio capture error"); }
     }
 
     dest.stream.getAudioTracks().forEach(track=>canvasStream.addTrack(track));
@@ -427,4 +427,4 @@ async function exportEditedVideo(){
 $("exportBtn").onclick=exportEditedVideo;
 </script>
 </body>
-</html>            
+  </html>
